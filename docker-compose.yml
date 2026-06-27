@@ -1,0 +1,33 @@
+name: foodcraft
+
+services:
+  cockroachdb:
+    image: cockroachdb/cockroach:latest-v24.1
+    command: start-single-node --insecure
+    ports:
+      - "26257:26257"
+      - "8080:8080"
+    volumes:
+      - cockroach_data:/var/lib/cockroach
+
+  nakama:
+    image: registry.heroiclabs.com/heroiclabs/nakama:3.26.0
+    depends_on:
+      - cockroachdb
+    entrypoint:
+      - "/bin/sh"
+      - "-ecx"
+      - >
+        /nakama/nakama migrate up --database.address root@cockroachdb:26257 &&
+        exec /nakama/nakama --config /nakama/data/local.yml --database.address root@cockroachdb:26257
+    ports:
+      - "7349:7349"
+      - "7350:7350"
+      - "7351:7351"
+    volumes:
+      - ./local.yml:/nakama/data/local.yml
+      - ./modules/backend.so:/nakama/data/modules/backend.so
+    restart: unless-stopped
+
+volumes:
+  cockroach_data:

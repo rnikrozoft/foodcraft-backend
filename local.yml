@@ -1,0 +1,19 @@
+name: foodcraft
+console:
+  port: 7351
+  username: admin
+  password: password
+  signing_key: "defaultsigningkey"
+logger:
+  level: "DEBUG"
+session:
+  token_expiry_sec: 7200
+socket:
+  port: 7350
+  server_key: "foodcraft_dev_key"
+database:
+  address:
+    - "root@cockroachdb:26257"
+runtime:
+  path: "/nakama/data/modules"
+  http_key: "foodcraft_dev_key"

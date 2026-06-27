@@ -1,0 +1,1723 @@
+{
+  "version": 1,
+  "items": [
+    {
+      "id": "rice",
+      "name_th": "ข้าว",
+      "emoji": "🍚",
+      "category": "ingredient",
+      "tier": 0,
+      "starter": true
+    },
+    {
+      "id": "egg",
+      "name_th": "ไข่",
+      "emoji": "🥚",
+      "category": "ingredient",
+      "tier": 0,
+      "starter": true
+    },
+    {
+      "id": "flour",
+      "name_th": "แป้ง",
+      "emoji": "🌾",
+      "category": "ingredient",
+      "tier": 0,
+      "starter": false
+    },
+    {
+      "id": "fish",
+      "name_th": "ปลา",
+      "emoji": "🐟",
+      "category": "ingredient",
+      "tier": 0,
+      "starter": false
+    },
+    {
+      "id": "meat",
+      "name_th": "เนื้อ",
+      "emoji": "🥩",
+      "category": "ingredient",
+      "tier": 0,
+      "starter": false
+    },
+    {
+      "id": "milk",
+      "name_th": "นม",
+      "emoji": "🥛",
+      "category": "ingredient",
+      "tier": 0,
+      "starter": false
+    },
+    {
+      "id": "water",
+      "name_th": "น้ำ",
+      "emoji": "💧",
+      "category": "ingredient",
+      "tier": 0,
+      "starter": false
+    },
+    {
+      "id": "salt",
+      "name_th": "เกลือ",
+      "emoji": "🧂",
+      "category": "ingredient",
+      "tier": 0,
+      "starter": false
+    },
+    {
+      "id": "sugar",
+      "name_th": "น้ำตาล",
+      "emoji": "🍬",
+      "category": "ingredient",
+      "tier": 0,
+      "starter": false
+    },
+    {
+      "id": "tomato",
+      "name_th": "มะเขือเทศ",
+      "emoji": "🍅",
+      "category": "ingredient",
+      "tier": 0,
+      "starter": false
+    },
+    {
+      "id": "cheese",
+      "name_th": "ชีส",
+      "emoji": "🧀",
+      "category": "ingredient",
+      "tier": 0,
+      "starter": false
+    },
+    {
+      "id": "bread",
+      "name_th": "ขนมปัง",
+      "emoji": "🍞",
+      "category": "ingredient",
+      "tier": 0,
+      "starter": false
+    },
+    {
+      "id": "chicken",
+      "name_th": "ไก่",
+      "emoji": "🍗",
+      "category": "ingredient",
+      "tier": 0,
+      "starter": false
+    },
+    {
+      "id": "shrimp",
+      "name_th": "กุ้ง",
+      "emoji": "🦐",
+      "category": "ingredient",
+      "tier": 0,
+      "starter": false
+    },
+    {
+      "id": "noodle",
+      "name_th": "เส้น",
+      "emoji": "🍜",
+      "category": "ingredient",
+      "tier": 0,
+      "starter": false
+    },
+    {
+      "id": "chili",
+      "name_th": "พริก",
+      "emoji": "🌶️",
+      "category": "ingredient",
+      "tier": 0,
+      "starter": false
+    },
+    {
+      "id": "garlic",
+      "name_th": "กระเทียม",
+      "emoji": "🧄",
+      "category": "ingredient",
+      "tier": 0,
+      "starter": false
+    },
+    {
+      "id": "onion",
+      "name_th": "หอม",
+      "emoji": "🧅",
+      "category": "ingredient",
+      "tier": 0,
+      "starter": false
+    },
+    {
+      "id": "soy_sauce",
+      "name_th": "ซีอิ๊ว",
+      "emoji": "🫙",
+      "category": "ingredient",
+      "tier": 0,
+      "starter": false
+    },
+    {
+      "id": "oil",
+      "name_th": "น้ำมัน",
+      "emoji": "🫒",
+      "category": "ingredient",
+      "tier": 0,
+      "starter": false
+    },
+    {
+      "id": "butter",
+      "name_th": "เนย",
+      "emoji": "🧈",
+      "category": "ingredient",
+      "tier": 0,
+      "starter": false
+    },
+    {
+      "id": "potato",
+      "name_th": "มันฝรั่ง",
+      "emoji": "🥔",
+      "category": "ingredient",
+      "tier": 0,
+      "starter": false
+    },
+    {
+      "id": "vegetable",
+      "name_th": "ผัก",
+      "emoji": "🥬",
+      "category": "ingredient",
+      "tier": 0,
+      "starter": false
+    },
+    {
+      "id": "pork",
+      "name_th": "หมู",
+      "emoji": "🐷",
+      "category": "ingredient",
+      "tier": 0,
+      "starter": false
+    },
+    {
+      "id": "coconut",
+      "name_th": "มะพร้าว",
+      "emoji": "🥥",
+      "category": "ingredient",
+      "tier": 0,
+      "starter": false
+    },
+    {
+      "id": "lime",
+      "name_th": "มะนาว",
+      "emoji": "🍋",
+      "category": "ingredient",
+      "tier": 0,
+      "starter": false
+    },
+    {
+      "id": "chocolate",
+      "name_th": "ช็อกโกแลต",
+      "emoji": "🍫",
+      "category": "ingredient",
+      "tier": 0,
+      "starter": false
+    },
+    {
+      "id": "cream",
+      "name_th": "ครีม",
+      "emoji": "🍦",
+      "category": "ingredient",
+      "tier": 0,
+      "starter": false
+    },
+    {
+      "id": "dough",
+      "name_th": "แป้น",
+      "emoji": "🫓",
+      "category": "ingredient",
+      "tier": 1,
+      "starter": false
+    },
+    {
+      "id": "pasta",
+      "name_th": "พาสต้า",
+      "emoji": "🍝",
+      "category": "western",
+      "tier": 1,
+      "starter": false
+    },
+    {
+      "id": "fried_rice",
+      "name_th": "ข้าวผัด",
+      "emoji": "🍛",
+      "category": "thai",
+      "tier": 1,
+      "starter": false
+    },
+    {
+      "id": "omelette",
+      "name_th": "ไข่เจียว",
+      "emoji": "🍳",
+      "category": "thai",
+      "tier": 1,
+      "starter": false
+    },
+    {
+      "id": "sushi",
+      "name_th": "ซูชิ",
+      "emoji": "🍣",
+      "category": "japanese",
+      "tier": 1,
+      "starter": false
+    },
+    {
+      "id": "ramen",
+      "name_th": "ราเมน",
+      "emoji": "🍜",
+      "category": "japanese",
+      "tier": 1,
+      "starter": false
+    },
+    {
+      "id": "dumpling",
+      "name_th": "เกี๊ยว",
+      "emoji": "🥟",
+      "category": "chinese",
+      "tier": 1,
+      "starter": false
+    },
+    {
+      "id": "fried_noodle",
+      "name_th": "ผัดไทย",
+      "emoji": "🍝",
+      "category": "thai",
+      "tier": 1,
+      "starter": false
+    },
+    {
+      "id": "tom_yum",
+      "name_th": "ต้มยำ",
+      "emoji": "🍲",
+      "category": "thai",
+      "tier": 1,
+      "starter": false
+    },
+    {
+      "id": "green_curry",
+      "name_th": "แกงเขียวหวาน",
+      "emoji": "🍛",
+      "category": "thai",
+      "tier": 1,
+      "starter": false
+    },
+    {
+      "id": "pad_krapow",
+      "name_th": "ผัดกะเพรา",
+      "emoji": "🍛",
+      "category": "thai",
+      "tier": 1,
+      "starter": false
+    },
+    {
+      "id": "som_tum",
+      "name_th": "ส้มตำ",
+      "emoji": "🥗",
+      "category": "thai",
+      "tier": 1,
+      "starter": false
+    },
+    {
+      "id": "mango_sticky",
+      "name_th": "ข้าวเหนียวมะม่วง",
+      "emoji": "🥭",
+      "category": "dessert",
+      "tier": 1,
+      "starter": false
+    },
+    {
+      "id": "pizza",
+      "name_th": "พิซซ่า",
+      "emoji": "🍕",
+      "category": "western",
+      "tier": 1,
+      "starter": false
+    },
+    {
+      "id": "burger",
+      "name_th": "เบอร์เกอร์",
+      "emoji": "🍔",
+      "category": "western",
+      "tier": 1,
+      "starter": false
+    },
+    {
+      "id": "hotdog",
+      "name_th": "ฮอทดอก",
+      "emoji": "🌭",
+      "category": "western",
+      "tier": 1,
+      "starter": false
+    },
+    {
+      "id": "sandwich",
+      "name_th": "แซนด์วิช",
+      "emoji": "🥪",
+      "category": "western",
+      "tier": 1,
+      "starter": false
+    },
+    {
+      "id": "salad",
+      "name_th": "สลัด",
+      "emoji": "🥗",
+      "category": "western",
+      "tier": 1,
+      "starter": false
+    },
+    {
+      "id": "soup",
+      "name_th": "ซุป",
+      "emoji": "🍲",
+      "category": "western",
+      "tier": 1,
+      "starter": false
+    },
+    {
+      "id": "steak",
+      "name_th": "สเต็ก",
+      "emoji": "🥩",
+      "category": "western",
+      "tier": 1,
+      "starter": false
+    },
+    {
+      "id": "fried_chicken",
+      "name_th": "ไก่ทอด",
+      "emoji": "🍗",
+      "category": "western",
+      "tier": 1,
+      "starter": false
+    },
+    {
+      "id": "tempura",
+      "name_th": "เทมปุระ",
+      "emoji": "🍤",
+      "category": "japanese",
+      "tier": 1,
+      "starter": false
+    },
+    {
+      "id": "onigiri",
+      "name_th": "โอนิกิริ",
+      "emoji": "🍙",
+      "category": "japanese",
+      "tier": 1,
+      "starter": false
+    },
+    {
+      "id": "miso_soup",
+      "name_th": "มิโซะซุป",
+      "emoji": "🍲",
+      "category": "japanese",
+      "tier": 1,
+      "starter": false
+    },
+    {
+      "id": "fried_egg",
+      "name_th": "ไข่ดาว",
+      "emoji": "🍳",
+      "category": "thai",
+      "tier": 1,
+      "starter": false
+    },
+    {
+      "id": "boiled_egg",
+      "name_th": "ไข่ต้ม",
+      "emoji": "🥚",
+      "category": "ingredient",
+      "tier": 1,
+      "starter": false
+    },
+    {
+      "id": "noodlesoup",
+      "name_th": "ก๋วยเตี๋ยว",
+      "emoji": "🍜",
+      "category": "thai",
+      "tier": 1,
+      "starter": false
+    },
+    {
+      "id": "ice_cream",
+      "name_th": "ไอศกรีม",
+      "emoji": "🍨",
+      "category": "dessert",
+      "tier": 1,
+      "starter": false
+    },
+    {
+      "id": "cake",
+      "name_th": "เค้ก",
+      "emoji": "🎂",
+      "category": "dessert",
+      "tier": 1,
+      "starter": false
+    },
+    {
+      "id": "cookie",
+      "name_th": "คุกกี้",
+      "emoji": "🍪",
+      "category": "dessert",
+      "tier": 1,
+      "starter": false
+    },
+    {
+      "id": "pancake",
+      "name_th": "แพนเค้ก",
+      "emoji": "🥞",
+      "category": "dessert",
+      "tier": 1,
+      "starter": false
+    },
+    {
+      "id": "sushi_cheese",
+      "name_th": "ซูชิชีส",
+      "emoji": "🍣",
+      "category": "japanese",
+      "tier": 2,
+      "rare": true,
+      "starter": false
+    },
+    {
+      "id": "spaghetti",
+      "name_th": "สปาเก็ตตี",
+      "emoji": "🍝",
+      "category": "western",
+      "tier": 2,
+      "starter": false
+    },
+    {
+      "id": "carbonara",
+      "name_th": "คาร์โบนาร่า",
+      "emoji": "🍝",
+      "category": "western",
+      "tier": 2,
+      "rare": true,
+      "starter": false
+    },
+    {
+      "id": "khao_man_gai",
+      "name_th": "ข้าวมันไก่",
+      "emoji": "🍛",
+      "category": "thai",
+      "tier": 2,
+      "rare": true,
+      "starter": false
+    },
+    {
+      "id": "massaman",
+      "name_th": "แกงมัสมั่น",
+      "emoji": "🍛",
+      "category": "thai",
+      "tier": 2,
+      "rare": true,
+      "starter": false
+    },
+    {
+      "id": "pad_thai",
+      "name_th": "ผัดไทย",
+      "emoji": "🍝",
+      "category": "thai",
+      "tier": 2,
+      "rare": true,
+      "starter": false
+    },
+    {
+      "id": "dim_sum",
+      "name_th": "ติ๋มซำ",
+      "emoji": "🥟",
+      "category": "chinese",
+      "tier": 2,
+      "rare": true,
+      "starter": false
+    },
+    {
+      "id": "fried_rice_pork",
+      "name_th": "ข้าวผัดหมู",
+      "emoji": "🍛",
+      "category": "thai",
+      "tier": 2,
+      "starter": false
+    },
+    {
+      "id": "cheeseburger",
+      "name_th": "ชีสเบอร์เกอร์",
+      "emoji": "🍔",
+      "category": "western",
+      "tier": 2,
+      "starter": false
+    },
+    {
+      "id": "chocolate_cake",
+      "name_th": "เค้กช็อกโกแลต",
+      "emoji": "🎂",
+      "category": "dessert",
+      "tier": 2,
+      "rare": true,
+      "starter": false
+    },
+    {
+      "id": "milk_tea",
+      "name_th": "ชานม",
+      "emoji": "🧋",
+      "category": "dessert",
+      "tier": 2,
+      "starter": false
+    },
+    {
+      "id": "toast",
+      "name_th": "ขนมปังปิ้ง",
+      "emoji": "🍞",
+      "category": "western",
+      "tier": 1,
+      "starter": false
+    },
+    {
+      "id": "garlic_bread",
+      "name_th": "ขนมปังกระเทียม",
+      "emoji": "🍞",
+      "category": "western",
+      "tier": 2,
+      "starter": false
+    },
+    {
+      "id": "fish_sauce",
+      "name_th": "น้ำปลา",
+      "emoji": "🫙",
+      "category": "ingredient",
+      "tier": 1,
+      "starter": false
+    },
+    {
+      "id": "coconut_milk",
+      "name_th": "กะทิ",
+      "emoji": "🥥",
+      "category": "ingredient",
+      "tier": 1,
+      "starter": false
+    },
+    {
+      "id": "chili_paste",
+      "name_th": "น้ำพริก",
+      "emoji": "🌶️",
+      "category": "ingredient",
+      "tier": 1,
+      "starter": false
+    },
+    {
+      "id": "basil",
+      "name_th": "กะเพรา",
+      "emoji": "🌿",
+      "category": "ingredient",
+      "tier": 1,
+      "starter": false
+    },
+    {
+      "id": "khao_soi",
+      "name_th": "ข้าวซอย",
+      "emoji": "🍜",
+      "category": "thai",
+      "tier": 3,
+      "rare": true,
+      "starter": false
+    },
+    {
+      "id": "boat_noodle",
+      "name_th": "ก๋วยเตี๋ยวเรือ",
+      "emoji": "🥣",
+      "category": "thai",
+      "tier": 3,
+      "rare": true,
+      "starter": false
+    },
+    {
+      "id": "tom_kha",
+      "name_th": "ต้มข่าไก่",
+      "emoji": "🍲",
+      "category": "thai",
+      "tier": 3,
+      "rare": true,
+      "starter": false
+    },
+    {
+      "id": "hor_mok",
+      "name_th": "ห่อหมกปลา",
+      "emoji": "🥘",
+      "category": "thai",
+      "tier": 3,
+      "rare": true,
+      "starter": false
+    },
+    {
+      "id": "golden_curry",
+      "name_th": "แกงทองคำ",
+      "emoji": "🍛",
+      "category": "thai",
+      "tier": 3,
+      "rare": true,
+      "starter": false
+    },
+    {
+      "id": "tonkotsu_ramen",
+      "name_th": "ราเมนทงโกตสึ",
+      "emoji": "🍜",
+      "category": "japanese",
+      "tier": 3,
+      "rare": true,
+      "starter": false
+    },
+    {
+      "id": "omakase_platter",
+      "name_th": "จานโอมากาเซ",
+      "emoji": "🍱",
+      "category": "japanese",
+      "tier": 3,
+      "rare": true,
+      "starter": false
+    },
+    {
+      "id": "beef_wellington",
+      "name_th": "บีฟเวลลิงตัน",
+      "emoji": "🥩",
+      "category": "western",
+      "tier": 3,
+      "rare": true,
+      "starter": false
+    },
+    {
+      "id": "truffle_pasta",
+      "name_th": "พาสต้าทรัฟเฟิล",
+      "emoji": "🍝",
+      "category": "western",
+      "tier": 3,
+      "rare": true,
+      "starter": false
+    },
+    {
+      "id": "xiao_long_bao",
+      "name_th": "เสี่ยวหลงเปา",
+      "emoji": "🥟",
+      "category": "chinese",
+      "tier": 3,
+      "rare": true,
+      "starter": false
+    },
+    {
+      "id": "peking_roll",
+      "name_th": "แป๊ะก๊วย",
+      "emoji": "🦆",
+      "category": "chinese",
+      "tier": 3,
+      "rare": true,
+      "starter": false
+    },
+    {
+      "id": "tiramisu",
+      "name_th": "ทิรามิสู",
+      "emoji": "🍰",
+      "category": "dessert",
+      "tier": 3,
+      "rare": true,
+      "starter": false
+    },
+    {
+      "id": "matcha_parfait",
+      "name_th": "พาร์เฟ่มัทฉะ",
+      "emoji": "🍨",
+      "category": "dessert",
+      "tier": 3,
+      "rare": true,
+      "starter": false
+    },
+    {
+      "id": "egg_fried_rice",
+      "name_th": "ข้าวผัดไข่",
+      "emoji": "🍳",
+      "category": "thai",
+      "tier": 1,
+      "starter": false
+    },
+    {
+      "id": "garlic_fried_rice",
+      "name_th": "ข้าวผัดกระเทียม",
+      "emoji": "🧄",
+      "category": "thai",
+      "tier": 1,
+      "starter": false
+    },
+    {
+      "id": "khai_tok_rice",
+      "name_th": "ข้าวไข่ดาว",
+      "emoji": "🍳",
+      "category": "thai",
+      "tier": 1,
+      "starter": false
+    },
+    {
+      "id": "rice_soup",
+      "name_th": "ข้าวต้ม",
+      "emoji": "🍲",
+      "category": "thai",
+      "tier": 1,
+      "starter": false
+    },
+    {
+      "id": "egg_drop_soup",
+      "name_th": "ไข่น้ำ",
+      "emoji": "🥣",
+      "category": "chinese",
+      "tier": 1,
+      "starter": false
+    },
+    {
+      "id": "hainan_rice",
+      "name_th": "ข้าวมัน",
+      "emoji": "🍚",
+      "category": "thai",
+      "tier": 1,
+      "starter": false
+    }
+  ],
+  "recipes": [
+    {
+      "a": "flour",
+      "b": "water",
+      "result": "dough"
+    },
+    {
+      "a": "dough",
+      "b": "egg",
+      "result": "pasta"
+    },
+    {
+      "a": "pasta",
+      "b": "tomato",
+      "result": "spaghetti"
+    },
+    {
+      "a": "spaghetti",
+      "b": "cheese",
+      "result": "carbonara"
+    },
+    {
+      "a": "rice",
+      "b": "egg",
+      "result": "fried_rice"
+    },
+    {
+      "a": "fried_rice",
+      "b": "pork",
+      "result": "fried_rice_pork"
+    },
+    {
+      "a": "rice",
+      "b": "fish",
+      "result": "sushi"
+    },
+    {
+      "a": "sushi",
+      "b": "cheese",
+      "result": "sushi_cheese"
+    },
+    {
+      "a": "rice",
+      "b": "chicken",
+      "result": "khao_man_gai"
+    },
+    {
+      "a": "egg",
+      "b": "oil",
+      "result": "fried_egg"
+    },
+    {
+      "a": "egg",
+      "b": "water",
+      "result": "boiled_egg"
+    },
+    {
+      "a": "egg",
+      "b": "salt",
+      "result": "omelette"
+    },
+    {
+      "a": "noodle",
+      "b": "water",
+      "result": "noodlesoup"
+    },
+    {
+      "a": "noodle",
+      "b": "shrimp",
+      "result": "ramen"
+    },
+    {
+      "a": "noodle",
+      "b": "pork",
+      "result": "pad_thai"
+    },
+    {
+      "a": "noodle",
+      "b": "egg",
+      "result": "fried_noodle"
+    },
+    {
+      "a": "dough",
+      "b": "pork",
+      "result": "dumpling"
+    },
+    {
+      "a": "dumpling",
+      "b": "shrimp",
+      "result": "dim_sum"
+    },
+    {
+      "a": "shrimp",
+      "b": "flour",
+      "result": "tempura"
+    },
+    {
+      "a": "rice",
+      "b": "salt",
+      "result": "onigiri"
+    },
+    {
+      "a": "water",
+      "b": "salt",
+      "result": "miso_soup"
+    },
+    {
+      "a": "chicken",
+      "b": "chili",
+      "result": "tom_yum"
+    },
+    {
+      "a": "chicken",
+      "b": "coconut_milk",
+      "result": "green_curry"
+    },
+    {
+      "a": "pork",
+      "b": "basil",
+      "result": "pad_krapow"
+    },
+    {
+      "a": "lime",
+      "b": "chili",
+      "result": "som_tum"
+    },
+    {
+      "a": "rice",
+      "b": "coconut",
+      "result": "mango_sticky"
+    },
+    {
+      "a": "dough",
+      "b": "tomato",
+      "result": "pizza"
+    },
+    {
+      "a": "bread",
+      "b": "meat",
+      "result": "burger"
+    },
+    {
+      "a": "burger",
+      "b": "cheese",
+      "result": "cheeseburger"
+    },
+    {
+      "a": "bread",
+      "b": "meat",
+      "result": "hotdog"
+    },
+    {
+      "a": "bread",
+      "b": "cheese",
+      "result": "sandwich"
+    },
+    {
+      "a": "vegetable",
+      "b": "tomato",
+      "result": "salad"
+    },
+    {
+      "a": "water",
+      "b": "vegetable",
+      "result": "soup"
+    },
+    {
+      "a": "meat",
+      "b": "salt",
+      "result": "steak"
+    },
+    {
+      "a": "chicken",
+      "b": "oil",
+      "result": "fried_chicken"
+    },
+    {
+      "a": "milk",
+      "b": "sugar",
+      "result": "ice_cream"
+    },
+    {
+      "a": "flour",
+      "b": "sugar",
+      "result": "cake"
+    },
+    {
+      "a": "cake",
+      "b": "chocolate",
+      "result": "chocolate_cake"
+    },
+    {
+      "a": "flour",
+      "b": "butter",
+      "result": "cookie"
+    },
+    {
+      "a": "flour",
+      "b": "egg",
+      "result": "pancake"
+    },
+    {
+      "a": "bread",
+      "b": "butter",
+      "result": "toast"
+    },
+    {
+      "a": "toast",
+      "b": "garlic",
+      "result": "garlic_bread"
+    },
+    {
+      "a": "milk",
+      "b": "sugar",
+      "result": "milk_tea"
+    },
+    {
+      "a": "fish",
+      "b": "salt",
+      "result": "fish_sauce"
+    },
+    {
+      "a": "coconut",
+      "b": "water",
+      "result": "coconut_milk"
+    },
+    {
+      "a": "chili",
+      "b": "garlic",
+      "result": "chili_paste"
+    },
+    {
+      "a": "vegetable",
+      "b": "garlic",
+      "result": "basil"
+    },
+    {
+      "a": "meat",
+      "b": "potato",
+      "result": "massaman"
+    },
+    {
+      "a": "onion",
+      "b": "tomato",
+      "result": "pizza"
+    },
+    {
+      "a": "rice",
+      "b": "garlic",
+      "result": "fried_rice"
+    },
+    {
+      "a": "shrimp",
+      "b": "lime",
+      "result": "tom_yum"
+    },
+    {
+      "a": "pork",
+      "b": "soy_sauce",
+      "result": "pad_krapow"
+    },
+    {
+      "a": "egg",
+      "b": "flour",
+      "result": "pancake"
+    },
+    {
+      "a": "milk",
+      "b": "chocolate",
+      "result": "ice_cream"
+    },
+    {
+      "a": "cream",
+      "b": "sugar",
+      "result": "ice_cream"
+    },
+    {
+      "a": "dough",
+      "b": "cheese",
+      "result": "pizza"
+    },
+    {
+      "a": "chicken",
+      "b": "rice",
+      "result": "khao_man_gai"
+    },
+    {
+      "a": "noodle",
+      "b": "chicken",
+      "result": "ramen"
+    },
+    {
+      "a": "fish",
+      "b": "lime",
+      "result": "som_tum"
+    },
+    {
+      "a": "potato",
+      "b": "oil",
+      "result": "fried_chicken"
+    },
+    {
+      "a": "bread",
+      "b": "egg",
+      "result": "sandwich"
+    },
+    {
+      "a": "tomato",
+      "b": "onion",
+      "result": "salad"
+    },
+    {
+      "a": "meat",
+      "b": "bread",
+      "result": "burger"
+    },
+    {
+      "a": "sugar",
+      "b": "egg",
+      "result": "cake"
+    },
+    {
+      "a": "butter",
+      "b": "sugar",
+      "result": "cookie"
+    },
+    {
+      "a": "rice",
+      "b": "coconut_milk",
+      "result": "mango_sticky"
+    },
+    {
+      "a": "pork",
+      "b": "chili_paste",
+      "result": "pad_krapow"
+    },
+    {
+      "a": "chicken",
+      "b": "basil",
+      "result": "pad_krapow"
+    },
+    {
+      "a": "shrimp",
+      "b": "chili",
+      "result": "tom_yum"
+    },
+    {
+      "a": "meat",
+      "b": "coconut_milk",
+      "result": "massaman"
+    },
+    {
+      "a": "potato",
+      "b": "meat",
+      "result": "massaman"
+    },
+    {
+      "a": "noodle",
+      "b": "soy_sauce",
+      "result": "pad_thai"
+    },
+    {
+      "a": "egg",
+      "b": "noodle",
+      "result": "fried_noodle"
+    },
+    {
+      "a": "flour",
+      "b": "milk",
+      "result": "pancake"
+    },
+    {
+      "a": "cream",
+      "b": "chocolate",
+      "result": "chocolate_cake"
+    },
+    {
+      "a": "milk",
+      "b": "sugar",
+      "result": "milk_tea"
+    },
+    {
+      "a": "bread",
+      "b": "garlic",
+      "result": "garlic_bread"
+    },
+    {
+      "a": "dough",
+      "b": "oil",
+      "result": "pizza"
+    },
+    {
+      "a": "fish",
+      "b": "soy_sauce",
+      "result": "sushi"
+    },
+    {
+      "a": "rice",
+      "b": "pork",
+      "result": "fried_rice_pork"
+    },
+    {
+      "a": "chicken",
+      "b": "oil",
+      "result": "fried_chicken"
+    },
+    {
+      "a": "vegetable",
+      "b": "lime",
+      "result": "som_tum"
+    },
+    {
+      "a": "shrimp",
+      "b": "noodle",
+      "result": "ramen"
+    },
+    {
+      "a": "egg",
+      "b": "cheese",
+      "result": "omelette"
+    },
+    {
+      "a": "tomato",
+      "b": "cheese",
+      "result": "pizza"
+    },
+    {
+      "a": "meat",
+      "b": "cheese",
+      "result": "cheeseburger"
+    },
+    {
+      "a": "chicken",
+      "b": "rice",
+      "result": "khao_man_gai"
+    },
+    {
+      "a": "coconut_milk",
+      "b": "chicken",
+      "result": "green_curry"
+    },
+    {
+      "a": "chili_paste",
+      "b": "lime",
+      "result": "som_tum"
+    },
+    {
+      "a": "fish_sauce",
+      "b": "lime",
+      "result": "som_tum"
+    },
+    {
+      "a": "onion",
+      "b": "garlic",
+      "result": "basil"
+    },
+    {
+      "a": "salt",
+      "b": "fish",
+      "result": "fish_sauce"
+    },
+    {
+      "a": "coconut",
+      "b": "milk",
+      "result": "coconut_milk"
+    },
+    {
+      "a": "green_curry",
+      "b": "noodle",
+      "result": "khao_soi"
+    },
+    {
+      "a": "noodlesoup",
+      "b": "chili_paste",
+      "result": "boat_noodle"
+    },
+    {
+      "a": "tom_yum",
+      "b": "coconut_milk",
+      "result": "tom_kha"
+    },
+    {
+      "a": "massaman",
+      "b": "fish",
+      "result": "hor_mok"
+    },
+    {
+      "a": "massaman",
+      "b": "coconut_milk",
+      "result": "golden_curry"
+    },
+    {
+      "a": "ramen",
+      "b": "pork",
+      "result": "tonkotsu_ramen"
+    },
+    {
+      "a": "sushi_cheese",
+      "b": "tempura",
+      "result": "omakase_platter"
+    },
+    {
+      "a": "steak",
+      "b": "dough",
+      "result": "beef_wellington"
+    },
+    {
+      "a": "carbonara",
+      "b": "cream",
+      "result": "truffle_pasta"
+    },
+    {
+      "a": "dumpling",
+      "b": "soup",
+      "result": "xiao_long_bao"
+    },
+    {
+      "a": "dim_sum",
+      "b": "pancake",
+      "result": "peking_roll"
+    },
+    {
+      "a": "chocolate_cake",
+      "b": "milk_tea",
+      "result": "tiramisu"
+    },
+    {
+      "a": "ice_cream",
+      "b": "milk_tea",
+      "result": "matcha_parfait"
+    },
+    {
+      "a": "fried_rice",
+      "b": "egg",
+      "result": "egg_fried_rice"
+    },
+    {
+      "a": "fried_rice",
+      "b": "garlic",
+      "result": "garlic_fried_rice"
+    },
+    {
+      "a": "fried_rice",
+      "b": "oil",
+      "result": "garlic_fried_rice"
+    },
+    {
+      "a": "fried_egg",
+      "b": "rice",
+      "result": "khai_tok_rice"
+    },
+    {
+      "a": "rice",
+      "b": "water",
+      "result": "rice_soup"
+    },
+    {
+      "a": "rice_soup",
+      "b": "egg",
+      "result": "egg_drop_soup"
+    },
+    {
+      "a": "rice",
+      "b": "oil",
+      "result": "hainan_rice"
+    },
+    {
+      "a": "hainan_rice",
+      "b": "chicken",
+      "result": "khao_man_gai"
+    },
+    {
+      "a": "fried_rice",
+      "b": "chicken",
+      "result": "khao_man_gai"
+    },
+    {
+      "a": "fried_rice",
+      "b": "fish",
+      "result": "sushi"
+    },
+    {
+      "a": "fried_rice",
+      "b": "shrimp",
+      "result": "tempura"
+    },
+    {
+      "a": "egg_fried_rice",
+      "b": "pork",
+      "result": "fried_rice_pork"
+    },
+    {
+      "a": "garlic_fried_rice",
+      "b": "pork",
+      "result": "fried_rice_pork"
+    },
+    {
+      "a": "egg_fried_rice",
+      "b": "chicken",
+      "result": "khao_man_gai"
+    },
+    {
+      "a": "rice_soup",
+      "b": "chicken",
+      "result": "noodlesoup"
+    },
+    {
+      "a": "egg_drop_soup",
+      "b": "noodle",
+      "result": "noodlesoup"
+    },
+    {
+      "a": "omelette",
+      "b": "rice",
+      "result": "khai_tok_rice"
+    },
+    {
+      "a": "boiled_egg",
+      "b": "rice",
+      "result": "onigiri"
+    },
+    {
+      "a": "fried_rice",
+      "b": "noodle",
+      "result": "fried_noodle"
+    },
+    {
+      "a": "fried_rice",
+      "b": "soy_sauce",
+      "result": "fried_noodle"
+    },
+    {
+      "a": "egg_fried_rice",
+      "b": "noodle",
+      "result": "pad_thai"
+    },
+    {
+      "a": "garlic_fried_rice",
+      "b": "basil",
+      "result": "pad_krapow"
+    },
+    {
+      "a": "fried_rice",
+      "b": "basil",
+      "result": "pad_krapow"
+    },
+    {
+      "a": "fried_rice",
+      "b": "lime",
+      "result": "som_tum"
+    },
+    {
+      "a": "fried_rice",
+      "b": "chili",
+      "result": "tom_yum"
+    },
+    {
+      "a": "rice_soup",
+      "b": "pork",
+      "result": "noodlesoup"
+    },
+    {
+      "a": "egg_drop_soup",
+      "b": "shrimp",
+      "result": "tom_yum"
+    },
+    {
+      "a": "hainan_rice",
+      "b": "coconut_milk",
+      "result": "mango_sticky"
+    },
+    {
+      "a": "fried_rice",
+      "b": "coconut",
+      "result": "mango_sticky"
+    },
+    {
+      "a": "rice",
+      "b": "milk",
+      "result": "pancake"
+    },
+    {
+      "a": "pancake",
+      "b": "sugar",
+      "result": "cake"
+    },
+    {
+      "a": "fried_rice",
+      "b": "cheese",
+      "result": "omelette"
+    },
+    {
+      "a": "fried_rice",
+      "b": "tomato",
+      "result": "pizza"
+    },
+    {
+      "a": "fried_rice",
+      "b": "butter",
+      "result": "toast"
+    },
+    {
+      "a": "fried_rice_pork",
+      "b": "basil",
+      "result": "pad_krapow"
+    },
+    {
+      "a": "fried_rice_pork",
+      "b": "egg",
+      "result": "egg_fried_rice"
+    },
+    {
+      "a": "fried_rice_pork",
+      "b": "noodle",
+      "result": "pad_thai"
+    },
+    {
+      "a": "fried_rice",
+      "b": "rice",
+      "result": "water"
+    },
+    {
+      "a": "water",
+      "b": "fried_rice",
+      "result": "oil"
+    },
+    {
+      "a": "water",
+      "b": "oil",
+      "result": "salt"
+    },
+    {
+      "a": "salt",
+      "b": "oil",
+      "result": "garlic"
+    },
+    {
+      "a": "garlic",
+      "b": "salt",
+      "result": "onion"
+    },
+    {
+      "a": "onion",
+      "b": "salt",
+      "result": "vegetable"
+    },
+    {
+      "a": "vegetable",
+      "b": "salt",
+      "result": "tomato"
+    },
+    {
+      "a": "tomato",
+      "b": "garlic",
+      "result": "chili"
+    },
+    {
+      "a": "chili",
+      "b": "tomato",
+      "result": "sugar"
+    },
+    {
+      "a": "sugar",
+      "b": "salt",
+      "result": "flour"
+    },
+    {
+      "a": "onion",
+      "b": "oil",
+      "result": "pork"
+    },
+    {
+      "a": "pork",
+      "b": "salt",
+      "result": "meat"
+    },
+    {
+      "a": "meat",
+      "b": "oil",
+      "result": "chicken"
+    },
+    {
+      "a": "chicken",
+      "b": "water",
+      "result": "fish"
+    },
+    {
+      "a": "fish",
+      "b": "oil",
+      "result": "shrimp"
+    },
+    {
+      "a": "meat",
+      "b": "water",
+      "result": "milk"
+    },
+    {
+      "a": "milk",
+      "b": "salt",
+      "result": "cheese"
+    },
+    {
+      "a": "cheese",
+      "b": "flour",
+      "result": "bread"
+    },
+    {
+      "a": "milk",
+      "b": "oil",
+      "result": "butter"
+    },
+    {
+      "a": "flour",
+      "b": "oil",
+      "result": "noodle"
+    },
+    {
+      "a": "sugar",
+      "b": "water",
+      "result": "coconut"
+    },
+    {
+      "a": "coconut",
+      "b": "salt",
+      "result": "lime"
+    },
+    {
+      "a": "sugar",
+      "b": "butter",
+      "result": "chocolate"
+    },
+    {
+      "a": "milk",
+      "b": "butter",
+      "result": "cream"
+    },
+    {
+      "a": "vegetable",
+      "b": "oil",
+      "result": "potato"
+    },
+    {
+      "a": "oil",
+      "b": "garlic",
+      "result": "soy_sauce"
+    }
+  ],
+  "categories": [
+    {
+      "id": "ingredient",
+      "name_th": "วัตถุดิบ"
+    },
+    {
+      "id": "thai",
+      "name_th": "อาหารไทย"
+    },
+    {
+      "id": "japanese",
+      "name_th": "อาหารญี่ปุ่น"
+    },
+    {
+      "id": "chinese",
+      "name_th": "อาหารจีน"
+    },
+    {
+      "id": "western",
+      "name_th": "อาหารตะวันตก"
+    },
+    {
+      "id": "dessert",
+      "name_th": "ของหวาน"
+    }
+  ],
+  "achievements": [
+    {
+      "id": "discover_10",
+      "name_th": "นักชิมมือใหม่",
+      "description": "ค้นพบอาหาร 10 เมนู",
+      "target": 10
+    },
+    {
+      "id": "discover_25",
+      "name_th": "เชฟบ้าน",
+      "description": "ค้นพบอาหาร 25 เมนู",
+      "target": 25
+    },
+    {
+      "id": "discover_50",
+      "name_th": "เชฟมืออาชีพ",
+      "description": "ค้นพบอาหาร 50 เมนู",
+      "target": 50
+    },
+    {
+      "id": "discover_100",
+      "name_th": "ปรมาจารย์อาหาร",
+      "description": "ค้นพบอาหาร 100 เมนู",
+      "target": 100
+    },
+    {
+      "id": "thai_5",
+      "name_th": "รสชาติไทย",
+      "description": "ค้นพบอาหารไทย 5 เมนู",
+      "target": 5,
+      "category": "thai"
+    },
+    {
+      "id": "japanese_5",
+      "name_th": "รสชาติญี่ปุ่น",
+      "description": "ค้นพบอาหารญี่ปุ่น 5 เมนู",
+      "target": 5,
+      "category": "japanese"
+    },
+    {
+      "id": "western_5",
+      "name_th": "รสชาติตะวันตก",
+      "description": "ค้นพบอาหารตะวันตก 5 เมนู",
+      "target": 5,
+      "category": "western"
+    },
+    {
+      "id": "dessert_5",
+      "name_th": "คนรักของหวาน",
+      "description": "ค้นพบของหวาน 5 เมนู",
+      "target": 5,
+      "category": "dessert"
+    },
+    {
+      "id": "rare_5",
+      "name_th": "นักล่าสมบัติ",
+      "description": "ค้นพบเมนูหายาก 5 เมนู",
+      "target": 5,
+      "kind": "rare"
+    }
+  ],
+  "initial_discovered": [
+    "rice",
+    "egg"
+  ]
+}
