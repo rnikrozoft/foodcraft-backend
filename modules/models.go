@@ -19,6 +19,8 @@ type PlayerState struct {
 	Discovered      []string `json:"discovered"`
 	CraftCount      int      `json:"craft_count"`
 	DiscoveryPoints int      `json:"discovery_points"`
+	Coins           int      `json:"coins"`
+	Stars           int      `json:"stars"`
 }
 
 type DiscoverRequest struct {
@@ -32,6 +34,10 @@ type DiscoverResponse struct {
 	DiscoveryPoints int      `json:"discovery_points"`
 	DiscoveryCount  int      `json:"discovery_count"`
 	CraftCount      int      `json:"craft_count"`
+	Coins           int      `json:"coins"`
+	Stars           int      `json:"stars"`
+	RewardType      string   `json:"reward_type,omitempty"`
+	RewardAmount    int      `json:"reward_amount,omitempty"`
 	FirstDiscoverer string   `json:"first_discoverer,omitempty"`
 	Discovered      []string `json:"discovered"`
 }

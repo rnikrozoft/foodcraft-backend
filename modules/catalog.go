@@ -109,6 +109,14 @@ func (c *Catalog) HasIngredient(discovered map[string]bool, id string) bool {
 	return discovered[id]
 }
 
+func (c *Catalog) TierFor(itemID string) int {
+	item, ok := c.Items[itemID]
+	if !ok || item.Tier < 1 {
+		return 1
+	}
+	return item.Tier
+}
+
 func containsID(list []string, id string) bool {
 	for _, v := range list {
 		if v == id {

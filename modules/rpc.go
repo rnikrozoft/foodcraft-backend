@@ -48,9 +48,13 @@ func rpcDiscoverRecipe(ctx context.Context, logger runtime.Logger, db *sql.DB, n
 
 	isNew := !containsID(state.Discovered, req.ItemID)
 	firstDiscoverer := ""
+	rewardType := ""
+	rewardAmount := 0
 	if isNew {
 		state.Discovered = uniqueAppend(state.Discovered, req.ItemID)
 		state.DiscoveryPoints = totalPoints(catalog, state.Discovered)
+		rewardType, rewardAmount = rollDiscoveryReward(catalog.TierFor(req.ItemID))
+		applyReward(state, rewardType, rewardAmount)
 		if ok, err := recordFirstDiscover(ctx, nk, req.ItemID, userID, username); err != nil {
 			logger.Warn("first discover write failed: %v", err)
 		} else if ok {
@@ -71,6 +75,10 @@ func rpcDiscoverRecipe(ctx context.Context, logger runtime.Logger, db *sql.DB, n
 		DiscoveryPoints: state.DiscoveryPoints,
 		DiscoveryCount:  len(state.Discovered),
 		CraftCount:      state.CraftCount,
+		Coins:           state.Coins,
+		Stars:           state.Stars,
+		RewardType:      rewardType,
+		RewardAmount:    rewardAmount,
 		FirstDiscoverer: firstDiscoverer,
 		Discovered:      state.Discovered,
 	}
@@ -120,6 +128,8 @@ func rpcSyncDiscoveries(ctx context.Context, logger runtime.Logger, db *sql.DB, 
 		}
 		state.Discovered = uniqueAppend(state.Discovered, discovery.ItemID)
 		known[discovery.ItemID] = true
+		rewardType, rewardAmount := rollDiscoveryReward(catalog.TierFor(discovery.ItemID))
+		applyReward(state, rewardType, rewardAmount)
 		_, _ = recordFirstDiscover(ctx, nk, discovery.ItemID, userID, username)
 	}
 
@@ -136,6 +146,8 @@ func rpcSyncDiscoveries(ctx context.Context, logger runtime.Logger, db *sql.DB, 
 		DiscoveryPoints: state.DiscoveryPoints,
 		DiscoveryCount:  len(state.Discovered),
 		CraftCount:      state.CraftCount,
+		Coins:           state.Coins,
+		Stars:           state.Stars,
 		Discovered:      state.Discovered,
 	}
 	bytes, _ := json.Marshal(resp)
@@ -198,6 +210,8 @@ func rpcGetProfile(ctx context.Context, logger runtime.Logger, db *sql.DB, nk ru
 		"discovery_count":  resp.DiscoveryCount,
 		"discovery_points": resp.DiscoveryPoints,
 		"craft_count":      resp.CraftCount,
+		"coins":            state.Coins,
+		"stars":            state.Stars,
 		"efficiency":       resp.Efficiency,
 		"discovered":       resp.Discovered,
 		"ranks":            resp.Ranks,
