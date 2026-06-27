@@ -4,13 +4,9 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
+	"sort"
 
 	"github.com/heroiclabs/nakama-common/runtime"
-)
-
-const (
-	leaderboardFame     = "culinary_fame"
-	leaderboardExplorer = "explorer"
 )
 
 func rpcDiscoverRecipe(ctx context.Context, logger runtime.Logger, db *sql.DB, nk runtime.NakamaModule, payload string) (string, error) {
@@ -50,6 +46,7 @@ func rpcDiscoverRecipe(ctx context.Context, logger runtime.Logger, db *sql.DB, n
 	firstDiscoverer := ""
 	rewardType := ""
 	rewardAmount := 0
+	wasFirst := false
 	if isNew {
 		state.Discovered = uniqueAppend(state.Discovered, req.ItemID)
 		state.DiscoveryPoints = totalPoints(catalog, state.Discovered)
@@ -59,7 +56,9 @@ func rpcDiscoverRecipe(ctx context.Context, logger runtime.Logger, db *sql.DB, n
 			logger.Warn("first discover write failed: %v", err)
 		} else if ok {
 			firstDiscoverer = username
+			wasFirst = true
 		}
+		onNewDiscovery(state, req.ItemID, wasFirst)
 	}
 
 	if err := writePlayerState(ctx, nk, userID, state); err != nil {
@@ -73,7 +72,7 @@ func rpcDiscoverRecipe(ctx context.Context, logger runtime.Logger, db *sql.DB, n
 		IsNew:           isNew,
 		ItemID:          req.ItemID,
 		DiscoveryPoints: state.DiscoveryPoints,
-		DiscoveryCount:  len(state.Discovered),
+		DiscoveryCount:  discoveryMenuCount(state),
 		CraftCount:      state.CraftCount,
 		Coins:           state.Coins,
 		Stars:           state.Stars,
@@ -109,6 +108,7 @@ func rpcSyncDiscoveries(ctx context.Context, logger runtime.Logger, db *sql.DB, 
 
 	if req.CraftCount > state.CraftCount {
 		state.CraftCount = req.CraftCount
+		refreshSeason(state)
 	}
 
 	known := discoveredSet(state.Discovered)
@@ -130,7 +130,11 @@ func rpcSyncDiscoveries(ctx context.Context, logger runtime.Logger, db *sql.DB, 
 		known[discovery.ItemID] = true
 		rewardType, rewardAmount := rollDiscoveryReward(catalog.TierFor(discovery.ItemID))
 		applyReward(state, rewardType, rewardAmount)
-		_, _ = recordFirstDiscover(ctx, nk, discovery.ItemID, userID, username)
+		wasFirst := false
+		if ok, _ := recordFirstDiscover(ctx, nk, discovery.ItemID, userID, username); ok {
+			wasFirst = true
+		}
+		onNewDiscovery(state, discovery.ItemID, wasFirst)
 	}
 
 	state.DiscoveryPoints = totalPoints(catalog, state.Discovered)
@@ -144,7 +148,7 @@ func rpcSyncDiscoveries(ctx context.Context, logger runtime.Logger, db *sql.DB, 
 	resp := DiscoverResponse{
 		IsNew:           false,
 		DiscoveryPoints: state.DiscoveryPoints,
-		DiscoveryCount:  len(state.Discovered),
+		DiscoveryCount:  discoveryMenuCount(state),
 		CraftCount:      state.CraftCount,
 		Coins:           state.Coins,
 		Stars:           state.Stars,
@@ -159,14 +163,26 @@ func rpcRecordCraft(ctx context.Context, logger runtime.Logger, db *sql.DB, nk r
 	if err != nil {
 		return "", err
 	}
+	username := mustUsername(ctx)
+
+	var req struct {
+		IsNewDiscovery bool `json:"is_new_discovery"`
+	}
+	if payload != "" {
+		_ = json.Unmarshal([]byte(payload), &req)
+	}
 
 	state, err := readPlayerState(ctx, nk, userID)
 	if err != nil {
 		return "", rpcError("failed to read state", 13)
 	}
 	state.CraftCount++
+	onCraftRecorded(state, req.IsNewDiscovery)
 	if err := writePlayerState(ctx, nk, userID, state); err != nil {
 		return "", rpcError("failed to save state", 13)
+	}
+	if err := updateLeaderboards(ctx, nk, userID, username, state); err != nil {
+		logger.Warn("leaderboard update failed: %v", err)
 	}
 	bytes, _ := json.Marshal(map[string]int{"craft_count": state.CraftCount})
 	return string(bytes), nil
@@ -184,38 +200,33 @@ func rpcGetProfile(ctx context.Context, logger runtime.Logger, db *sql.DB, nk ru
 		return "", rpcError("failed to read state", 13)
 	}
 
+	menuCount := discoveryMenuCount(state)
 	efficiency := 0.0
 	if state.CraftCount > 0 {
-		efficiency = float64(len(state.Discovered)) / float64(state.CraftCount) * 100.0
+		efficiency = float64(menuCount) / float64(state.CraftCount) * 100.0
 	}
 
-	fameRank, _ := getOwnerRank(ctx, nk, leaderboardFame, userID)
-	explorerRank, _ := getOwnerRank(ctx, nk, leaderboardExplorer, userID)
-
-	resp := ProfileResponse{
-		Username:        username,
-		DiscoveryCount:  len(state.Discovered),
-		DiscoveryPoints: state.DiscoveryPoints,
-		CraftCount:      state.CraftCount,
-		Efficiency:      efficiency,
-		Discovered:      state.Discovered,
-		Ranks: map[string]int{
-			leaderboardFame:     fameRank,
-			leaderboardExplorer: explorerRank,
-		},
-	}
 	bytes, _ := json.Marshal(map[string]interface{}{
-		"user_id":          userID,
-		"username":         resp.Username,
-		"discovery_count":  resp.DiscoveryCount,
-		"discovery_points": resp.DiscoveryPoints,
-		"craft_count":      resp.CraftCount,
-		"coins":            state.Coins,
-		"stars":            state.Stars,
-		"efficiency":       resp.Efficiency,
-		"discovered":       resp.Discovered,
-		"ranks":            resp.Ranks,
+		"user_id":              userID,
+		"username":             username,
+		"discovery_count":      menuCount,
+		"discovery_points":     state.DiscoveryPoints,
+		"craft_count":          state.CraftCount,
+		"coins":                state.Coins,
+		"stars":                state.Stars,
+		"efficiency":           efficiency,
+		"first_discover_count": state.FirstDiscoverCount,
+		"max_combo_streak":     state.MaxComboStreak,
+		"rare_discover_count":  state.RareDiscoverCount,
+		"discovered":           state.Discovered,
+		"ranks":                allBoardRanks(ctx, nk, userID),
 	})
+	return string(bytes), nil
+}
+
+func rpcListLeaderboards(ctx context.Context, logger runtime.Logger, db *sql.DB, nk runtime.NakamaModule, payload string) (string, error) {
+	resp := LeaderboardListResponse{Boards: leaderboardDefs}
+	bytes, _ := json.Marshal(resp)
 	return string(bytes), nil
 }
 
@@ -241,9 +252,9 @@ func rpcGetLeaderboard(ctx context.Context, logger runtime.Logger, db *sql.DB, n
 		req.Limit = 20
 	}
 
-	title := "Culinary Fame"
-	if req.BoardID == leaderboardExplorer {
-		title = "Explorer"
+	def, ok := boardDefFor(req.BoardID)
+	if !ok {
+		return "", rpcError("unknown board", 3)
 	}
 
 	records, ownerRecords, _, _, err := nk.LeaderboardRecordsList(ctx, req.BoardID, []string{userID}, req.Limit, "", 0)
@@ -252,9 +263,12 @@ func rpcGetLeaderboard(ctx context.Context, logger runtime.Logger, db *sql.DB, n
 	}
 
 	resp := LeaderboardResponse{
-		BoardID: req.BoardID,
-		Title:   title,
-		Records: make([]LeaderboardEntry, 0, len(records)),
+		BoardID:     req.BoardID,
+		Title:       def.Title,
+		Description: def.Description,
+		ScoreUnit:   def.ScoreUnit,
+		Tier:        def.Tier,
+		Records:     make([]LeaderboardEntry, 0, len(records)),
 	}
 	for _, record := range records {
 		resp.Records = append(resp.Records, LeaderboardEntry{
@@ -274,6 +288,63 @@ func rpcGetLeaderboard(ctx context.Context, logger runtime.Logger, db *sql.DB, n
 		}
 	}
 
+	bytes, _ := json.Marshal(resp)
+	return string(bytes), nil
+}
+
+func rpcGetHallOfFame(ctx context.Context, logger runtime.Logger, db *sql.DB, nk runtime.NakamaModule, payload string) (string, error) {
+	if err := ensureCatalog(logger); err != nil {
+		return "", rpcError("catalog unavailable", 13)
+	}
+	userID, err := mustUserID(ctx)
+	if err != nil {
+		return "", err
+	}
+
+	var req struct {
+		Limit  int `json:"limit"`
+		Cursor int `json:"cursor"`
+	}
+	if payload != "" {
+		_ = json.Unmarshal([]byte(payload), &req)
+	}
+	if req.Limit <= 0 || req.Limit > 50 {
+		req.Limit = 30
+	}
+
+	objects, _, err := nk.StorageList(ctx, userID, "", collectionFirstDiscover, req.Limit, "")
+	if err != nil {
+		return "", rpcError("hall of fame unavailable", 13)
+	}
+
+	entries := make([]HallOfFameEntry, 0, len(objects))
+	for _, obj := range objects {
+		var record FirstDiscoverRecord
+		if err := json.Unmarshal([]byte(obj.Value), &record); err != nil {
+			continue
+		}
+		item, ok := catalog.Items[obj.Key]
+		name := obj.Key
+		emoji := ""
+		if ok {
+			name = item.NameTH
+			emoji = item.Emoji
+		}
+		entries = append(entries, HallOfFameEntry{
+			ItemID:       obj.Key,
+			ItemName:     name,
+			Emoji:        emoji,
+			UserID:       record.UserID,
+			Username:     record.Username,
+			DiscoveredAt: record.DiscoveredAt,
+		})
+	}
+
+	sort.Slice(entries, func(i, j int) bool {
+		return entries[i].DiscoveredAt > entries[j].DiscoveredAt
+	})
+
+	resp := HallOfFameResponse{Entries: entries}
 	bytes, _ := json.Marshal(resp)
 	return string(bytes), nil
 }

@@ -33,25 +33,33 @@ func InitModule(ctx context.Context, logger runtime.Logger, db *sql.DB, nk runti
 	if err := initializer.RegisterRpc("get_leaderboard", rpcGetLeaderboard); err != nil {
 		return err
 	}
+	if err := initializer.RegisterRpc("list_leaderboards", rpcListLeaderboards); err != nil {
+		return err
+	}
+	if err := initializer.RegisterRpc("get_hall_of_fame", rpcGetHallOfFame); err != nil {
+		return err
+	}
 
 	logger.Info("Foodcraft Nakama module loaded")
 	return nil
 }
 
 func ensureLeaderboards(ctx context.Context, logger runtime.Logger, nk runtime.NakamaModule) error {
-	boards := []struct {
-		id    string
-		title string
-	}{
-		{leaderboardFame, "Culinary Fame"},
-		{leaderboardExplorer, "Explorer"},
+	seasonBoards := map[string]bool{
+		leaderboardSeasonExplorer:  true,
+		leaderboardSeasonEfficiency: true,
 	}
-	for _, board := range boards {
-		if err := nk.LeaderboardCreate(ctx, board.id, true, "desc", "best", "0 0 * * *", map[string]interface{}{
-			"title": board.title,
+	for _, def := range leaderboardDefs {
+		reset := "0 0 * * *"
+		if seasonBoards[def.ID] {
+			reset = "0 0 1 * *"
+		}
+		if err := nk.LeaderboardCreate(ctx, def.ID, true, "desc", "best", reset, map[string]interface{}{
+			"title": def.Title,
+			"tier":  def.Tier,
 		}, false); err != nil {
 			if !isAlreadyExists(err) {
-				logger.Error("leaderboard create failed for %s: %v", board.id, err)
+				logger.Error("leaderboard create failed for %s: %v", def.ID, err)
 				return err
 			}
 		}

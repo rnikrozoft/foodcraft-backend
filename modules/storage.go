@@ -88,16 +88,6 @@ func recordFirstDiscover(ctx context.Context, nk runtime.NakamaModule, itemID, u
 	return true, nil
 }
 
-func updateLeaderboards(ctx context.Context, nk runtime.NakamaModule, userID, username string, state *PlayerState) error {
-	if _, err := nk.LeaderboardRecordWrite(ctx, leaderboardFame, userID, username, int64(state.DiscoveryPoints), 0, map[string]interface{}{}, nil); err != nil {
-		return err
-	}
-	if _, err := nk.LeaderboardRecordWrite(ctx, leaderboardExplorer, userID, username, int64(len(state.Discovered)), 0, map[string]interface{}{}, nil); err != nil {
-		return err
-	}
-	return nil
-}
-
 func getOwnerRank(ctx context.Context, nk runtime.NakamaModule, boardID, userID string) (int, error) {
 	records, _, _, _, err := nk.LeaderboardRecordsList(ctx, boardID, []string{userID}, 1, "", 0)
 	if err != nil {
