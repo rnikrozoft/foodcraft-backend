@@ -39,7 +39,7 @@ func loadCatalog() (*Catalog, error) {
 		ItemPoints:      make(map[string]int, len(raw.Items)),
 		DiscoverableIDs: make(map[string]bool),
 		StarterIDs:      make(map[string]bool),
-		Shop:            normalizeShopConfig(raw.Shop),
+		Shop:            applyShopEnvOverrides(raw.Shop),
 	}
 
 	outDegree := make(map[string]int)
@@ -148,6 +148,29 @@ func (c *Catalog) ValidateDiscovery(itemID, a, b string) error {
 
 func (c *Catalog) IsStarter(id string) bool {
 	return c.StarterIDs[id]
+}
+
+func (c *Catalog) gameConfigResponse() GameConfigResponse {
+	items := make([]ItemDef, 0, len(c.Items))
+	for _, item := range c.Items {
+		items = append(items, item)
+	}
+	sort.Slice(items, func(i, j int) bool { return items[i].ID < items[j].ID })
+
+	starterItems := make([]string, 0, len(c.StarterIDs))
+	for id := range c.StarterIDs {
+		starterItems = append(starterItems, id)
+	}
+	sort.Strings(starterItems)
+
+	return GameConfigResponse{
+		Version:           1,
+		Items:             items,
+		StarterItems:      starterItems,
+		DiscoverableTotal: len(c.DiscoverableIDs),
+		DailyRewardCoins:  dailyRewardCoins,
+		Shop:              c.Shop,
+	}
 }
 
 func (c *Catalog) HasIngredient(discovered map[string]bool, unlocked map[string]bool, id string) bool {

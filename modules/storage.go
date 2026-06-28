@@ -3,38 +3,36 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"fmt"
+	"strings"
 	"time"
 
 	"github.com/heroiclabs/nakama-common/runtime"
 )
 
 const (
-	collectionPlayer       = "player"
-	keyState               = "state"
+	collectionPlayer        = "player"
+	keyState                = "state"
 	collectionFirstDiscover = "first_discover"
+	systemUserID            = "00000000-0000-0000-0000-000000000000"
 )
 
-func readPlayerState(ctx context.Context, nk runtime.NakamaModule, userID string) (*PlayerState, error) {
-	objects, err := nk.StorageRead(ctx, []*runtime.StorageRead{{
-		Collection: collectionPlayer,
-		Key:        keyState,
-		UserID:     userID,
-	}})
-	if err != nil {
-		return nil, err
+type playerStateRecord struct {
+	State   *PlayerState
+	Version string
+}
+
+func defaultPlayerState() *PlayerState {
+	return &PlayerState{
+		Discovered:          []string{},
+		UnlockedIngredients: []string{},
+		ShopItemExpiresAt:   map[string]int64{},
+		ShopRarityExpiresAt: map[string]int64{},
+		ShopActiveIDs:       []string{},
 	}
-	if len(objects) == 0 {
-		return &PlayerState{
-			Discovered:          []string{},
-			UnlockedIngredients: []string{},
-			ShopItemExpiresAt:   map[string]int64{},
-			ShopActiveIDs:       []string{},
-		}, nil
-	}
-	var state PlayerState
-	if err := json.Unmarshal([]byte(objects[0].Value), &state); err != nil {
-		return nil, err
-	}
+}
+
+func normalizePlayerState(state *PlayerState) {
 	if state.Discovered == nil {
 		state.Discovered = []string{}
 	}
@@ -44,38 +42,189 @@ func readPlayerState(ctx context.Context, nk runtime.NakamaModule, userID string
 	if state.ShopItemExpiresAt == nil {
 		state.ShopItemExpiresAt = map[string]int64{}
 	}
+	if state.ShopRarityExpiresAt == nil {
+		state.ShopRarityExpiresAt = map[string]int64{}
+	}
 	if state.ShopActiveIDs == nil {
 		state.ShopActiveIDs = []string{}
 	}
-	return &state, nil
 }
 
-func writePlayerState(ctx context.Context, nk runtime.NakamaModule, userID string, state *PlayerState) error {
-	bytes, err := json.Marshal(state)
+func readPlayerStateRecord(ctx context.Context, nk runtime.NakamaModule, userID string) (*playerStateRecord, error) {
+	objects, err := nk.StorageRead(ctx, []*runtime.StorageRead{{
+		Collection: collectionPlayer,
+		Key:        keyState,
+		UserID:     userID,
+	}})
+	if err != nil {
+		return nil, err
+	}
+	if len(objects) == 0 {
+		return &playerStateRecord{State: defaultPlayerState(), Version: ""}, nil
+	}
+
+	var state PlayerState
+	if err := json.Unmarshal([]byte(objects[0].Value), &state); err != nil {
+		return nil, err
+	}
+	normalizePlayerState(&state)
+	return &playerStateRecord{
+		State:   &state,
+		Version: objects[0].Version,
+	}, nil
+}
+
+func readPlayerState(ctx context.Context, nk runtime.NakamaModule, userID string) (*PlayerState, error) {
+	record, err := readPlayerStateRecord(ctx, nk, userID)
+	if err != nil {
+		return nil, err
+	}
+	return record.State, nil
+}
+
+func writePlayerStateRecord(ctx context.Context, nk runtime.NakamaModule, userID string, record *playerStateRecord) error {
+	bytes, err := json.Marshal(record.State)
 	if err != nil {
 		return err
 	}
-	_, err = nk.StorageWrite(ctx, []*runtime.StorageWrite{{
+	acks, err := nk.StorageWrite(ctx, []*runtime.StorageWrite{{
 		Collection:      collectionPlayer,
 		Key:             keyState,
 		UserID:          userID,
 		Value:           string(bytes),
+		Version:         record.Version,
 		PermissionRead:  1,
 		PermissionWrite: 0,
 	}})
-	return err
+	if err != nil {
+		return err
+	}
+	if len(acks) > 0 {
+		record.Version = acks[0].Version
+	}
+	return nil
+}
+
+func writePlayerState(ctx context.Context, nk runtime.NakamaModule, userID string, state *PlayerState) error {
+	record, err := readPlayerStateRecord(ctx, nk, userID)
+	if err != nil {
+		return err
+	}
+	record.State = state
+	return writePlayerStateRecord(ctx, nk, userID, record)
+}
+
+func isVersionConflict(err error) bool {
+	if err == nil {
+		return false
+	}
+	message := strings.ToLower(err.Error())
+	return strings.Contains(message, "version") || strings.Contains(message, "conflict")
+}
+
+func modifyPlayerState(
+	ctx context.Context,
+	nk runtime.NakamaModule,
+	userID string,
+	fn func(*PlayerState) error,
+) error {
+	const maxAttempts = 3
+	var lastErr error
+	for attempt := 0; attempt < maxAttempts; attempt++ {
+		record, err := readPlayerStateRecord(ctx, nk, userID)
+		if err != nil {
+			return err
+		}
+		if err := ensureWalletMigrated(ctx, nk, userID, record); err != nil {
+			return err
+		}
+		if err := fn(record.State); err != nil {
+			return err
+		}
+		if err := writePlayerStateRecord(ctx, nk, userID, record); err != nil {
+			if isVersionConflict(err) {
+				lastErr = err
+				continue
+			}
+			return err
+		}
+		return nil
+	}
+	if lastErr != nil {
+		return fmt.Errorf("state version conflict: %w", lastErr)
+	}
+	return fmt.Errorf("state version conflict")
+}
+
+func modifyPlayerStateWithWallet(
+	ctx context.Context,
+	nk runtime.NakamaModule,
+	userID string,
+	fn func(*PlayerState) (map[string]int64, map[string]interface{}, error),
+) error {
+	const maxAttempts = 3
+	var lastErr error
+	for attempt := 0; attempt < maxAttempts; attempt++ {
+		record, err := readPlayerStateRecord(ctx, nk, userID)
+		if err != nil {
+			return err
+		}
+		if err := ensureWalletMigrated(ctx, nk, userID, record); err != nil {
+			return err
+		}
+		changeset, metadata, err := fn(record.State)
+		if err != nil {
+			return err
+		}
+		if err := savePlayerStateWithWalletRecord(ctx, nk, userID, record, changeset, metadata); err != nil {
+			if isVersionConflict(err) {
+				lastErr = err
+				continue
+			}
+			return err
+		}
+		return nil
+	}
+	if lastErr != nil {
+		return fmt.Errorf("state version conflict: %w", lastErr)
+	}
+	return fmt.Errorf("state version conflict")
+}
+
+func ensurePlayerStateExists(ctx context.Context, nk runtime.NakamaModule, userID string) error {
+	record, err := readPlayerStateRecord(ctx, nk, userID)
+	if err != nil {
+		return err
+	}
+	if record.Version != "" {
+		return nil
+	}
+	return writePlayerStateRecord(ctx, nk, userID, record)
+}
+
+func firstDiscoverExists(ctx context.Context, nk runtime.NakamaModule, itemID string) (bool, error) {
+	for _, ownerID := range []string{systemUserID, ""} {
+		objects, err := nk.StorageRead(ctx, []*runtime.StorageRead{{
+			Collection: collectionFirstDiscover,
+			Key:        itemID,
+			UserID:     ownerID,
+		}})
+		if err != nil {
+			return false, err
+		}
+		if len(objects) > 0 {
+			return true, nil
+		}
+	}
+	return false, nil
 }
 
 func recordFirstDiscover(ctx context.Context, nk runtime.NakamaModule, itemID, userID, username string) (bool, error) {
-	objects, err := nk.StorageRead(ctx, []*runtime.StorageRead{{
-		Collection: collectionFirstDiscover,
-		Key:        itemID,
-		UserID:     "",
-	}})
+	exists, err := firstDiscoverExists(ctx, nk, itemID)
 	if err != nil {
 		return false, err
 	}
-	if len(objects) > 0 {
+	if exists {
 		return false, nil
 	}
 
@@ -91,7 +240,7 @@ func recordFirstDiscover(ctx context.Context, nk runtime.NakamaModule, itemID, u
 	_, err = nk.StorageWrite(ctx, []*runtime.StorageWrite{{
 		Collection:      collectionFirstDiscover,
 		Key:             itemID,
-		UserID:          "",
+		UserID:          systemUserID,
 		Value:           string(bytes),
 		PermissionRead:  2,
 		PermissionWrite: 0,

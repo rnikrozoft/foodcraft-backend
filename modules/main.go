@@ -13,18 +13,21 @@ func InitModule(ctx context.Context, logger runtime.Logger, db *sql.DB, nk runti
 		return err
 	}
 	logger.Info("Foodcraft catalog loaded: %d items, %d recipes", len(catalog.Items), len(catalog.RecipeByKey))
+	logger.Info("Shop config: rotation=%d weights=%v costs=%v",
+		catalog.Shop.RotationCount,
+		catalog.Shop.RarityRotationWeights,
+		catalog.Shop.RarityCosts,
+	)
 
 	if err := ensureLeaderboards(ctx, logger, nk); err != nil {
 		return err
 	}
 
-	if err := initializer.RegisterRpc("discover_recipe", rpcDiscoverRecipe); err != nil {
+	if err := initializer.RegisterAfterAuthenticateDevice(afterAuthenticateDevice); err != nil {
 		return err
 	}
-	if err := initializer.RegisterRpc("sync_discoveries", rpcSyncDiscoveries); err != nil {
-		return err
-	}
-	if err := initializer.RegisterRpc("record_craft", rpcRecordCraft); err != nil {
+
+	if err := initializer.RegisterRpc("process_craft", rpcProcessCraft); err != nil {
 		return err
 	}
 	if err := initializer.RegisterRpc("get_profile", rpcGetProfile); err != nil {
@@ -45,16 +48,16 @@ func InitModule(ctx context.Context, logger runtime.Logger, db *sql.DB, nk runti
 	if err := initializer.RegisterRpc("get_shop_state", rpcGetShopState); err != nil {
 		return err
 	}
-	if err := initializer.RegisterRpc("reset_shop", rpcResetShop); err != nil {
-		return err
-	}
 	if err := initializer.RegisterRpc("purchase_shop_ingredient", rpcPurchaseShopIngredient); err != nil {
 		return err
 	}
-	if err := initializer.RegisterRpc("adjust_wallet", rpcAdjustWallet); err != nil {
+	if err := initializer.RegisterRpc("sync_wallet", rpcSyncWallet); err != nil {
 		return err
 	}
-	if err := initializer.RegisterRpc("sync_wallet", rpcSyncWallet); err != nil {
+	if err := initializer.RegisterRpc("get_daily_reward", rpcGetDailyReward); err != nil {
+		return err
+	}
+	if err := initializer.RegisterRpc("claim_daily_reward", rpcClaimDailyReward); err != nil {
 		return err
 	}
 
@@ -64,7 +67,7 @@ func InitModule(ctx context.Context, logger runtime.Logger, db *sql.DB, nk runti
 
 func ensureLeaderboards(ctx context.Context, logger runtime.Logger, nk runtime.NakamaModule) error {
 	seasonBoards := map[string]bool{
-		leaderboardSeasonExplorer:  true,
+		leaderboardSeasonExplorer:   true,
 		leaderboardSeasonEfficiency: true,
 	}
 	for _, def := range leaderboardDefs {

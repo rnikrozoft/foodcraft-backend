@@ -40,12 +40,3 @@ func starAmount(tier int) int {
 	}
 	return 2
 }
-
-func applyReward(state *PlayerState, rewardType string, amount int) {
-	switch rewardType {
-	case "coin":
-		state.Coins += amount
-	case "star":
-		state.Stars += amount
-	}
-}

@@ -19,8 +19,8 @@ type PlayerState struct {
 	Discovered          []string `json:"discovered"`
 	CraftCount          int      `json:"craft_count"`
 	DiscoveryPoints     int      `json:"discovery_points"`
-	Coins               int      `json:"coins"`
-	Stars               int      `json:"stars"`
+	LegacyCoins         int      `json:"coins,omitempty"`
+	LegacyStars         int      `json:"stars,omitempty"`
 	FirstDiscoverCount  int      `json:"first_discover_count"`
 	MaxComboStreak      int      `json:"max_combo_streak"`
 	CurrentComboStreak  int      `json:"current_combo_streak"`
@@ -31,16 +31,18 @@ type PlayerState struct {
 	SeasonMonth         string           `json:"season_month"`
 	SeasonDiscoveries   int              `json:"season_discoveries"`
 	SeasonCraftCount    int              `json:"season_craft_count"`
-	UnlockedIngredients []string         `json:"unlocked_ingredients"`
-	ShopCycleStart      int64            `json:"shop_cycle_start"`
-	ShopManualResetCount int             `json:"shop_manual_reset_count"`
-	ShopItemExpiresAt   map[string]int64 `json:"shop_item_expires_at"`
-	ShopActiveIDs       []string         `json:"shop_active_ids"`
+	UnlockedIngredients     []string `json:"unlocked_ingredients"`
+	ShopLastAutoResetUnix   int64    `json:"shop_last_auto_reset_unix"`
+	ShopActiveIDs           []string `json:"shop_active_ids"`
+	// Legacy fields — ignored after auto-only shop migration.
+	ShopCycleStart       int64            `json:"shop_cycle_start,omitempty"`
+	ShopManualResetCount int              `json:"shop_manual_reset_count,omitempty"`
+	ShopItemExpiresAt    map[string]int64 `json:"shop_item_expires_at,omitempty"`
+	ShopRarityExpiresAt  map[string]int64 `json:"shop_rarity_expires_at,omitempty"`
 }
 
-type DiscoverRequest struct {
-	ItemID string   `json:"item_id"`
-	From   []string `json:"from"`
+type CraftRequest struct {
+	From []string `json:"from"`
 }
 
 type DiscoverResponse struct {
@@ -56,11 +58,6 @@ type DiscoverResponse struct {
 	FirstDiscoverer string   `json:"first_discoverer,omitempty"`
 	Discovered      []string `json:"discovered"`
 	UnlockedIngredients []string `json:"unlocked_ingredients"`
-}
-
-type SyncRequest struct {
-	Discoveries []DiscoverRequest `json:"discoveries"`
-	CraftCount  int               `json:"craft_count"`
 }
 
 type ProfileResponse struct {
@@ -107,70 +104,45 @@ type HallOfFameResponse struct {
 	Entries []HallOfFameEntry `json:"entries"`
 }
 
-type ShopResetPrices struct {
-	Mid      int    `json:"mid"`
-	High     int    `json:"high"`
-	Currency string `json:"currency"`
-}
-
 type ShopConfig struct {
-	ResetCycleSec      int                `json:"reset_cycle_sec"`
-	ResetMidCount      int                `json:"reset_mid_count"`
-	ResetPrices        ShopResetPrices    `json:"reset_prices"`
-	RarityCooldownDays map[string]int     `json:"rarity_cooldown_days"`
-	RarityCosts        map[string]int     `json:"rarity_costs"`
-	RarityLabels       map[string]string  `json:"rarity_labels"`
-	RotationCount      int                `json:"rotation_count"`
+	RarityRotationWeights map[string]int    `json:"rarity_rotation_weights"`
+	RarityCosts           map[string]int    `json:"rarity_costs"`
+	RarityLabels          map[string]string `json:"rarity_labels"`
+	RotationCount         int               `json:"rotation_count"`
 }
 
 type GameConfigResponse struct {
-	Version int        `json:"version"`
-	Shop    ShopConfig `json:"shop"`
-}
-
-type ShopResetInfo struct {
-	PriceType        string `json:"price_type"`
-	PriceLabel       string `json:"price_label"`
-	CoinCost         int    `json:"coin_cost"`
-	ResetsUsed       int    `json:"resets_used"`
-	NextFreeResetSec int64  `json:"next_free_reset_sec"`
+	Version           int        `json:"version"`
+	Items             []ItemDef  `json:"items"`
+	StarterItems      []string   `json:"starter_items"`
+	DiscoverableTotal int        `json:"discoverable_total"`
+	DailyRewardCoins  int        `json:"daily_reward_coins"`
+	Shop              ShopConfig `json:"shop"`
 }
 
 type ShopIngredientOffer struct {
-	ID                 string `json:"id"`
-	Title              string `json:"title"`
-	Emoji              string `json:"emoji"`
-	Rarity             string `json:"rarity"`
-	RarityLabel        string `json:"rarity_label"`
-	Cost               int    `json:"cost"`
-	Unlocked           bool   `json:"unlocked"`
-	Buyable            bool   `json:"buyable"`
-	CooldownSec        int64  `json:"cooldown_sec"`
-	WindowRemainingSec int64  `json:"window_remaining_sec"`
+	ID          string `json:"id"`
+	Title       string `json:"title"`
+	Emoji       string `json:"emoji"`
+	Rarity      string `json:"rarity"`
+	RarityLabel string `json:"rarity_label"`
+	Cost        int    `json:"cost"`
+	Unlocked    bool   `json:"unlocked"`
+	Buyable     bool   `json:"buyable"`
 }
 
 type ShopStateResponse struct {
-	Coins                int                   `json:"coins"`
-	ShopCycleStart       int64                 `json:"shop_cycle_start"`
-	ShopManualResetCount int                   `json:"shop_manual_reset_count"`
-	ShopItemExpiresAt    map[string]int64      `json:"shop_item_expires_at"`
-	ShopActiveIDs        []string              `json:"shop_active_ids"`
-	UnlockedIngredients  []string              `json:"unlocked_ingredients"`
-	ResetInfo            ShopResetInfo         `json:"reset_info"`
-	Offers               []ShopIngredientOffer `json:"offers"`
-}
-
-type ResetShopRequest struct {
-	PaymentType string `json:"payment_type"`
+	Coins                 int                   `json:"coins"`
+	Stars                 int                   `json:"stars"`
+	ShopLastAutoResetUnix int64                 `json:"shop_last_auto_reset_unix"`
+	NextShopResetSec      int64                 `json:"next_shop_reset_sec"`
+	ShopActiveIDs         []string              `json:"shop_active_ids"`
+	UnlockedIngredients   []string              `json:"unlocked_ingredients"`
+	Offers                []ShopIngredientOffer `json:"offers"`
 }
 
 type PurchaseIngredientRequest struct {
 	IngredientID string `json:"ingredient_id"`
-}
-
-type AdjustWalletRequest struct {
-	CoinsDelta int `json:"coins_delta"`
-	StarsDelta int `json:"stars_delta"`
 }
 
 type WalletResponse struct {

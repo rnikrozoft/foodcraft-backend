@@ -1725,19 +1725,12 @@
     "egg"
   ],
   "shop": {
-    "reset_cycle_sec": 86400,
-    "reset_mid_count": 5,
-    "reset_prices": {
-      "mid": 90,
-      "high": 150,
-      "currency": "coins"
-    },
-    "rarity_cooldown_days": {
-      "common": 3,
-      "uncommon": 5,
-      "rare": 7,
-      "epic": 10,
-      "legendary": 14
+    "rarity_rotation_weights": {
+      "common": 50,
+      "uncommon": 25,
+      "rare": 15,
+      "epic": 7,
+      "legendary": 3
     },
     "rarity_costs": {
       "common": 80,

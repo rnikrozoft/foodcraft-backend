@@ -14,6 +14,8 @@ services:
     image: registry.heroiclabs.com/heroiclabs/nakama:3.26.0
     depends_on:
       - cockroachdb
+    env_file:
+      - .env
     entrypoint:
       - "/bin/sh"
       - "-ecx"

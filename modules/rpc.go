@@ -9,7 +9,7 @@ import (
 	"github.com/heroiclabs/nakama-common/runtime"
 )
 
-func rpcDiscoverRecipe(ctx context.Context, logger runtime.Logger, db *sql.DB, nk runtime.NakamaModule, payload string) (string, error) {
+func rpcProcessCraft(ctx context.Context, logger runtime.Logger, db *sql.DB, nk runtime.NakamaModule, payload string) (string, error) {
 	if err := ensureCatalog(logger); err != nil {
 		return "", rpcError("catalog unavailable", 13)
 	}
@@ -18,9 +18,12 @@ func rpcDiscoverRecipe(ctx context.Context, logger runtime.Logger, db *sql.DB, n
 	if err != nil {
 		return "", err
 	}
+	if err := checkRateLimit(userID, "craft", craftRateLimit); err != nil {
+		return "", err
+	}
 	username := mustUsername(ctx)
 
-	var req DiscoverRequest
+	var req CraftRequest
 	if err := json.Unmarshal([]byte(payload), &req); err != nil {
 		return "", rpcError("invalid payload", 3)
 	}
@@ -28,189 +31,63 @@ func rpcDiscoverRecipe(ctx context.Context, logger runtime.Logger, db *sql.DB, n
 	if err != nil {
 		return "", rpcError(err.Error(), 3)
 	}
-	if err := catalog.ValidateCraftResult(req.ItemID, a, b); err != nil {
+	itemID, ok := catalog.LookupRecipe(a, b)
+	if !ok {
+		return "", rpcError("invalid recipe combination", 3)
+	}
+	if err := catalog.ValidateCraftResult(itemID, a, b); err != nil {
 		return "", rpcError(err.Error(), 3)
 	}
 
-	state, err := readPlayerState(ctx, nk, userID)
-	if err != nil {
-		return "", rpcError("failed to read state", 13)
-	}
-
-	known := discoveredSet(state.Discovered)
-	unlocked := unlockedIngredientSet(state.UnlockedIngredients)
-	if !catalog.HasIngredient(known, unlocked, a) || !catalog.HasIngredient(known, unlocked, b) {
-		return "", rpcError("missing prerequisite discoveries", 9)
-	}
-
-	resultKind := catalog.CraftResultKind(req.ItemID)
-	isNew := false
-	firstDiscoverer := ""
-	rewardType := ""
-	rewardAmount := 0
-	wasFirst := false
-	switch resultKind {
-	case "ingredient":
-		isNew = !isIngredientUnlocked(state, req.ItemID)
-		if isNew {
-			unlockIngredient(state, req.ItemID)
-			rewardType, rewardAmount = rollDiscoveryReward(1)
-			applyReward(state, rewardType, rewardAmount)
-		}
-	case "menu":
-		isNew = !containsID(state.Discovered, req.ItemID)
-		if isNew {
-			state.Discovered = uniqueAppend(state.Discovered, req.ItemID)
-			state.DiscoveryPoints = totalPoints(catalog, state.Discovered)
-			rewardType, rewardAmount = rollDiscoveryReward(catalog.TierFor(req.ItemID))
-			applyReward(state, rewardType, rewardAmount)
-			if ok, err := recordFirstDiscover(ctx, nk, req.ItemID, userID, username); err != nil {
-				logger.Warn("first discover write failed: %v", err)
-			} else if ok {
-				firstDiscoverer = username
-				wasFirst = true
-			}
-			onNewDiscovery(state, req.ItemID, wasFirst)
-		}
-	}
-
-	if err := writePlayerState(ctx, nk, userID, state); err != nil {
-		return "", rpcError("failed to save state", 13)
-	}
-	if err := updateLeaderboards(ctx, nk, userID, username, state); err != nil {
-		logger.Warn("leaderboard update failed: %v", err)
-	}
-
-	resp := DiscoverResponse{
-		IsNew:                 isNew,
-		ItemID:                req.ItemID,
-		DiscoveryPoints:       state.DiscoveryPoints,
-		DiscoveryCount:        discoveryMenuCount(state),
-		CraftCount:            state.CraftCount,
-		Coins:                 state.Coins,
-		Stars:                 state.Stars,
-		RewardType:            rewardType,
-		RewardAmount:          rewardAmount,
-		FirstDiscoverer:       firstDiscoverer,
-		Discovered:            state.Discovered,
-		UnlockedIngredients:   copyStringSlice(state.UnlockedIngredients),
-	}
-	bytes, _ := json.Marshal(resp)
-	return string(bytes), nil
-}
-
-func rpcSyncDiscoveries(ctx context.Context, logger runtime.Logger, db *sql.DB, nk runtime.NakamaModule, payload string) (string, error) {
-	if err := ensureCatalog(logger); err != nil {
-		return "", rpcError("catalog unavailable", 13)
-	}
-
-	userID, err := mustUserID(ctx)
-	if err != nil {
-		return "", err
-	}
-	username := mustUsername(ctx)
-
-	var req SyncRequest
-	if err := json.Unmarshal([]byte(payload), &req); err != nil {
-		return "", rpcError("invalid payload", 3)
-	}
-
-	state, err := readPlayerState(ctx, nk, userID)
-	if err != nil {
-		return "", rpcError("failed to read state", 13)
-	}
-
-	if req.CraftCount > state.CraftCount {
-		state.CraftCount = req.CraftCount
-		refreshSeason(state)
-	}
-
-	known := discoveredSet(state.Discovered)
-	unlocked := unlockedIngredientSet(state.UnlockedIngredients)
-	for _, discovery := range req.Discoveries {
-		a, b, err := normalizePair(discovery.From)
-		if err != nil {
-			continue
-		}
-		if err := catalog.ValidateCraftResult(discovery.ItemID, a, b); err != nil {
-			continue
-		}
+	var outcome craftOutcome
+	err = modifyPlayerStateWithWallet(ctx, nk, userID, func(state *PlayerState) (map[string]int64, map[string]interface{}, error) {
+		known := discoveredSet(state.Discovered)
+		unlocked := unlockedIngredientSet(state.UnlockedIngredients)
 		if !catalog.HasIngredient(known, unlocked, a) || !catalog.HasIngredient(known, unlocked, b) {
-			continue
+			return nil, nil, rpcError("missing prerequisite discoveries", 9)
 		}
-		switch catalog.CraftResultKind(discovery.ItemID) {
+
+		resultKind := catalog.CraftResultKind(itemID)
+		isNew := false
+		switch resultKind {
 		case "ingredient":
-			if isIngredientUnlocked(state, discovery.ItemID) {
-				continue
-			}
-			unlockIngredient(state, discovery.ItemID)
-			rewardType, rewardAmount := rollDiscoveryReward(1)
-			applyReward(state, rewardType, rewardAmount)
+			isNew = !isIngredientUnlocked(state, itemID)
 		case "menu":
-			if containsID(state.Discovered, discovery.ItemID) {
-				continue
-			}
-			state.Discovered = uniqueAppend(state.Discovered, discovery.ItemID)
-			known[discovery.ItemID] = true
-			rewardType, rewardAmount := rollDiscoveryReward(catalog.TierFor(discovery.ItemID))
-			applyReward(state, rewardType, rewardAmount)
-			wasFirst := false
-			if ok, _ := recordFirstDiscover(ctx, nk, discovery.ItemID, userID, username); ok {
-				wasFirst = true
-			}
-			onNewDiscovery(state, discovery.ItemID, wasFirst)
+			isNew = !containsID(state.Discovered, itemID)
 		}
-	}
 
-	state.DiscoveryPoints = totalPoints(catalog, state.Discovered)
-	if err := writePlayerState(ctx, nk, userID, state); err != nil {
-		return "", rpcError("failed to save state", 13)
-	}
-	if err := updateLeaderboards(ctx, nk, userID, username, state); err != nil {
-		logger.Warn("leaderboard update failed: %v", err)
-	}
+		state.CraftCount++
+		onCraftRecorded(state, isNew)
 
-	resp := DiscoverResponse{
-		IsNew:               false,
-		DiscoveryPoints:     state.DiscoveryPoints,
-		DiscoveryCount:      discoveryMenuCount(state),
-		CraftCount:          state.CraftCount,
-		Coins:               state.Coins,
-		Stars:               state.Stars,
-		Discovered:          state.Discovered,
-		UnlockedIngredients: copyStringSlice(state.UnlockedIngredients),
-	}
-	bytes, _ := json.Marshal(resp)
-	return string(bytes), nil
-}
+		walletDelta := map[string]int64{}
+		var applyErr error
+		outcome, applyErr = applyValidatedCraft(ctx, nk, userID, username, state, itemID, a, b, walletDelta)
+		if applyErr != nil {
+			return nil, nil, applyErr
+		}
 
-func rpcRecordCraft(ctx context.Context, logger runtime.Logger, db *sql.DB, nk runtime.NakamaModule, payload string) (string, error) {
-	userID, err := mustUserID(ctx)
+		return walletDelta, map[string]interface{}{
+			"source":  "process_craft",
+			"item_id": itemID,
+			"is_new":  outcome.IsNew,
+		}, nil
+	})
 	if err != nil {
 		return "", err
-	}
-	username := mustUsername(ctx)
-
-	var req struct {
-		IsNewDiscovery bool `json:"is_new_discovery"`
-	}
-	if payload != "" {
-		_ = json.Unmarshal([]byte(payload), &req)
 	}
 
 	state, err := readPlayerState(ctx, nk, userID)
 	if err != nil {
 		return "", rpcError("failed to read state", 13)
 	}
-	state.CraftCount++
-	onCraftRecorded(state, req.IsNewDiscovery)
-	if err := writePlayerState(ctx, nk, userID, state); err != nil {
-		return "", rpcError("failed to save state", 13)
+	updateLeaderboardsSafe(ctx, logger, nk, userID, username, state)
+
+	wallet, err := walletResponse(ctx, nk, userID)
+	if err != nil {
+		return "", rpcError("failed to read wallet", 13)
 	}
-	if err := updateLeaderboards(ctx, nk, userID, username, state); err != nil {
-		logger.Warn("leaderboard update failed: %v", err)
-	}
-	bytes, _ := json.Marshal(map[string]int{"craft_count": state.CraftCount})
+
+	bytes, _ := json.Marshal(buildDiscoverResponse(state, wallet, outcome, itemID))
 	return string(bytes), nil
 }
 
@@ -221,15 +98,24 @@ func rpcGetProfile(ctx context.Context, logger runtime.Logger, db *sql.DB, nk ru
 	}
 	username := mustUsername(ctx)
 
-	state, err := readPlayerState(ctx, nk, userID)
+	record, err := readPlayerStateRecord(ctx, nk, userID)
 	if err != nil {
 		return "", rpcError("failed to read state", 13)
 	}
+	if err := ensureWalletMigrated(ctx, nk, userID, record); err != nil {
+		return "", rpcError("failed to migrate wallet", 13)
+	}
+	state := record.State
 
 	menuCount := discoveryMenuCount(state)
 	efficiency := 0.0
 	if state.CraftCount > 0 {
 		efficiency = float64(menuCount) / float64(state.CraftCount) * 100.0
+	}
+
+	wallet, err := walletResponse(ctx, nk, userID)
+	if err != nil {
+		return "", rpcError("failed to read wallet", 13)
 	}
 
 	bytes, _ := json.Marshal(map[string]interface{}{
@@ -238,8 +124,8 @@ func rpcGetProfile(ctx context.Context, logger runtime.Logger, db *sql.DB, nk ru
 		"discovery_count":      menuCount,
 		"discovery_points":     state.DiscoveryPoints,
 		"craft_count":          state.CraftCount,
-		"coins":                state.Coins,
-		"stars":                state.Stars,
+		"coins":                wallet.Coins,
+		"stars":                wallet.Stars,
 		"efficiency":           efficiency,
 		"first_discover_count": state.FirstDiscoverCount,
 		"max_combo_streak":     state.MaxComboStreak,
@@ -381,10 +267,7 @@ func rpcGetGameConfig(ctx context.Context, logger runtime.Logger, db *sql.DB, nk
 		return "", rpcError("catalog unavailable", 13)
 	}
 
-	resp := GameConfigResponse{
-		Version: 1,
-		Shop:    catalog.Shop,
-	}
+	resp := catalog.gameConfigResponse()
 	bytes, err := json.Marshal(resp)
 	if err != nil {
 		return "", rpcError("failed to encode config", 13)
@@ -400,87 +283,24 @@ func rpcGetShopState(ctx context.Context, logger runtime.Logger, db *sql.DB, nk 
 	if err != nil {
 		return "", err
 	}
-	state, err := readPlayerState(ctx, nk, userID)
+
+	var resp ShopStateResponse
+	err = modifyPlayerState(ctx, nk, userID, func(state *PlayerState) error {
+		ensureShopState(state)
+		wallet, walletErr := walletResponse(ctx, nk, userID)
+		if walletErr != nil {
+			return walletErr
+		}
+		resp = buildShopStateResponse(state, wallet)
+		return nil
+	})
 	if err != nil {
 		return "", rpcError("failed to read state", 13)
 	}
-	resp := buildShopStateResponse(state)
-	if err := writePlayerState(ctx, nk, userID, state); err != nil {
-		return "", rpcError("failed to save state", 13)
-	}
+
 	bytes, err := json.Marshal(resp)
 	if err != nil {
 		return "", rpcError("failed to encode shop state", 13)
-	}
-	return string(bytes), nil
-}
-
-func rpcResetShop(ctx context.Context, logger runtime.Logger, db *sql.DB, nk runtime.NakamaModule, payload string) (string, error) {
-	if err := ensureCatalog(logger); err != nil {
-		return "", rpcError("catalog unavailable", 13)
-	}
-	userID, err := mustUserID(ctx)
-	if err != nil {
-		return "", err
-	}
-	var req ResetShopRequest
-	if payload != "" {
-		if err := json.Unmarshal([]byte(payload), &req); err != nil {
-			return "", rpcError("invalid payload", 3)
-		}
-	}
-	state, err := readPlayerState(ctx, nk, userID)
-	if err != nil {
-		return "", rpcError("failed to read state", 13)
-	}
-	switch req.PaymentType {
-	case "free":
-		if err := resetShopFree(state); err != nil {
-			return "", rpcError(err.Error(), 9)
-		}
-	case "paid":
-		if err := resetShopPaid(state); err != nil {
-			return "", rpcError(err.Error(), 9)
-		}
-	default:
-		return "", rpcError("invalid payment type", 3)
-	}
-	if err := writePlayerState(ctx, nk, userID, state); err != nil {
-		return "", rpcError("failed to save state", 13)
-	}
-	resp := buildShopStateResponse(state)
-	bytes, err := json.Marshal(resp)
-	if err != nil {
-		return "", rpcError("failed to encode shop state", 13)
-	}
-	return string(bytes), nil
-}
-
-func rpcAdjustWallet(ctx context.Context, logger runtime.Logger, db *sql.DB, nk runtime.NakamaModule, payload string) (string, error) {
-	userID, err := mustUserID(ctx)
-	if err != nil {
-		return "", err
-	}
-	var req AdjustWalletRequest
-	if err := json.Unmarshal([]byte(payload), &req); err != nil {
-		return "", rpcError("invalid payload", 3)
-	}
-	if req.CoinsDelta < 0 || req.StarsDelta < 0 {
-		return "", rpcError("invalid wallet delta", 3)
-	}
-	state, err := readPlayerState(ctx, nk, userID)
-	if err != nil {
-		return "", rpcError("failed to read state", 13)
-	}
-	state.Coins += req.CoinsDelta
-	state.Stars += req.StarsDelta
-	if err := writePlayerState(ctx, nk, userID, state); err != nil {
-		return "", rpcError("failed to save state", 13)
-	}
-	resp := WalletResponse{Coins: state.Coins, Stars: state.Stars}
-	bytes, err := json.Marshal(resp)
-	if err != nil {
-		return "", rpcError("failed to encode wallet", 13)
 	}
 	return string(bytes), nil
 }
@@ -490,27 +310,19 @@ func rpcSyncWallet(ctx context.Context, logger runtime.Logger, db *sql.DB, nk ru
 	if err != nil {
 		return "", err
 	}
-	var req WalletResponse
-	if err := json.Unmarshal([]byte(payload), &req); err != nil {
-		return "", rpcError("invalid payload", 3)
-	}
-	if req.Coins < 0 || req.Stars < 0 {
-		return "", rpcError("invalid wallet values", 3)
-	}
-	state, err := readPlayerState(ctx, nk, userID)
+
+	record, err := readPlayerStateRecord(ctx, nk, userID)
 	if err != nil {
 		return "", rpcError("failed to read state", 13)
 	}
-	if req.Coins > state.Coins {
-		state.Coins = req.Coins
+	if err := ensureWalletMigrated(ctx, nk, userID, record); err != nil {
+		return "", rpcError("failed to migrate wallet", 13)
 	}
-	if req.Stars > state.Stars {
-		state.Stars = req.Stars
+
+	resp, err := walletResponse(ctx, nk, userID)
+	if err != nil {
+		return "", rpcError("failed to read wallet", 13)
 	}
-	if err := writePlayerState(ctx, nk, userID, state); err != nil {
-		return "", rpcError("failed to save state", 13)
-	}
-	resp := WalletResponse{Coins: state.Coins, Stars: state.Stars}
 	bytes, err := json.Marshal(resp)
 	if err != nil {
 		return "", rpcError("failed to encode wallet", 13)
@@ -526,6 +338,9 @@ func rpcPurchaseShopIngredient(ctx context.Context, logger runtime.Logger, db *s
 	if err != nil {
 		return "", err
 	}
+	if err := checkRateLimit(userID, "shop_purchase", purchaseRateLimit); err != nil {
+		return "", err
+	}
 	var req PurchaseIngredientRequest
 	if err := json.Unmarshal([]byte(payload), &req); err != nil {
 		return "", rpcError("invalid payload", 3)
@@ -533,17 +348,46 @@ func rpcPurchaseShopIngredient(ctx context.Context, logger runtime.Logger, db *s
 	if req.IngredientID == "" {
 		return "", rpcError("missing ingredient_id", 3)
 	}
+
+	var resp ShopStateResponse
+	err = modifyPlayerStateWithWallet(ctx, nk, userID, func(state *PlayerState) (map[string]int64, map[string]interface{}, error) {
+		wallet, err := walletResponse(ctx, nk, userID)
+		if err != nil {
+			return nil, nil, err
+		}
+		cost := shopIngredientCost(req.IngredientID)
+		if err := purchaseShopIngredient(state, req.IngredientID, wallet.Coins); err != nil {
+			return nil, nil, rpcError(err.Error(), 9)
+		}
+		walletDelta := map[string]int64{}
+		if cost > 0 {
+			walletDelta[walletKeyCoins] = -int64(cost)
+		}
+		ensureShopState(state)
+		resp = buildShopStateResponse(state, wallet)
+		if cost > 0 {
+			resp.Coins = wallet.Coins - cost
+		}
+		return walletDelta, map[string]interface{}{
+			"source":        "purchase_shop_ingredient",
+			"ingredient_id": req.IngredientID,
+			"coin_cost":     cost,
+		}, nil
+	})
+	if err != nil {
+		return "", err
+	}
+
+	updatedWallet, err := walletResponse(ctx, nk, userID)
+	if err != nil {
+		return "", rpcError("failed to read wallet", 13)
+	}
 	state, err := readPlayerState(ctx, nk, userID)
 	if err != nil {
 		return "", rpcError("failed to read state", 13)
 	}
-	if err := purchaseShopIngredient(state, req.IngredientID); err != nil {
-		return "", rpcError(err.Error(), 9)
-	}
-	if err := writePlayerState(ctx, nk, userID, state); err != nil {
-		return "", rpcError("failed to save state", 13)
-	}
-	resp := buildShopStateResponse(state)
+	resp = buildShopStateResponse(state, updatedWallet)
+
 	bytes, err := json.Marshal(resp)
 	if err != nil {
 		return "", rpcError("failed to encode shop state", 13)
