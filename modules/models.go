@@ -28,9 +28,14 @@ type PlayerState struct {
 	StartedAt           int64    `json:"started_at"`
 	Milestone100At      int64    `json:"milestone_100_at"`
 	Milestone500At      int64    `json:"milestone_500_at"`
-	SeasonMonth         string   `json:"season_month"`
-	SeasonDiscoveries   int      `json:"season_discoveries"`
-	SeasonCraftCount    int      `json:"season_craft_count"`
+	SeasonMonth         string           `json:"season_month"`
+	SeasonDiscoveries   int              `json:"season_discoveries"`
+	SeasonCraftCount    int              `json:"season_craft_count"`
+	UnlockedIngredients []string         `json:"unlocked_ingredients"`
+	ShopCycleStart      int64            `json:"shop_cycle_start"`
+	ShopManualResetCount int             `json:"shop_manual_reset_count"`
+	ShopItemExpiresAt   map[string]int64 `json:"shop_item_expires_at"`
+	ShopActiveIDs       []string         `json:"shop_active_ids"`
 }
 
 type DiscoverRequest struct {
@@ -50,6 +55,7 @@ type DiscoverResponse struct {
 	RewardAmount    int      `json:"reward_amount,omitempty"`
 	FirstDiscoverer string   `json:"first_discoverer,omitempty"`
 	Discovered      []string `json:"discovered"`
+	UnlockedIngredients []string `json:"unlocked_ingredients"`
 }
 
 type SyncRequest struct {
@@ -99,6 +105,77 @@ type HallOfFameEntry struct {
 
 type HallOfFameResponse struct {
 	Entries []HallOfFameEntry `json:"entries"`
+}
+
+type ShopResetPrices struct {
+	Mid      int    `json:"mid"`
+	High     int    `json:"high"`
+	Currency string `json:"currency"`
+}
+
+type ShopConfig struct {
+	ResetCycleSec      int                `json:"reset_cycle_sec"`
+	ResetMidCount      int                `json:"reset_mid_count"`
+	ResetPrices        ShopResetPrices    `json:"reset_prices"`
+	RarityCooldownDays map[string]int     `json:"rarity_cooldown_days"`
+	RarityCosts        map[string]int     `json:"rarity_costs"`
+	RarityLabels       map[string]string  `json:"rarity_labels"`
+	RotationCount      int                `json:"rotation_count"`
+}
+
+type GameConfigResponse struct {
+	Version int        `json:"version"`
+	Shop    ShopConfig `json:"shop"`
+}
+
+type ShopResetInfo struct {
+	PriceType        string `json:"price_type"`
+	PriceLabel       string `json:"price_label"`
+	CoinCost         int    `json:"coin_cost"`
+	ResetsUsed       int    `json:"resets_used"`
+	NextFreeResetSec int64  `json:"next_free_reset_sec"`
+}
+
+type ShopIngredientOffer struct {
+	ID                 string `json:"id"`
+	Title              string `json:"title"`
+	Emoji              string `json:"emoji"`
+	Rarity             string `json:"rarity"`
+	RarityLabel        string `json:"rarity_label"`
+	Cost               int    `json:"cost"`
+	Unlocked           bool   `json:"unlocked"`
+	Buyable            bool   `json:"buyable"`
+	CooldownSec        int64  `json:"cooldown_sec"`
+	WindowRemainingSec int64  `json:"window_remaining_sec"`
+}
+
+type ShopStateResponse struct {
+	Coins                int                   `json:"coins"`
+	ShopCycleStart       int64                 `json:"shop_cycle_start"`
+	ShopManualResetCount int                   `json:"shop_manual_reset_count"`
+	ShopItemExpiresAt    map[string]int64      `json:"shop_item_expires_at"`
+	ShopActiveIDs        []string              `json:"shop_active_ids"`
+	UnlockedIngredients  []string              `json:"unlocked_ingredients"`
+	ResetInfo            ShopResetInfo         `json:"reset_info"`
+	Offers               []ShopIngredientOffer `json:"offers"`
+}
+
+type ResetShopRequest struct {
+	PaymentType string `json:"payment_type"`
+}
+
+type PurchaseIngredientRequest struct {
+	IngredientID string `json:"ingredient_id"`
+}
+
+type AdjustWalletRequest struct {
+	CoinsDelta int `json:"coins_delta"`
+	StarsDelta int `json:"stars_delta"`
+}
+
+type WalletResponse struct {
+	Coins int `json:"coins"`
+	Stars int `json:"stars"`
 }
 
 type FirstDiscoverRecord struct {

@@ -39,6 +39,24 @@ func InitModule(ctx context.Context, logger runtime.Logger, db *sql.DB, nk runti
 	if err := initializer.RegisterRpc("get_hall_of_fame", rpcGetHallOfFame); err != nil {
 		return err
 	}
+	if err := initializer.RegisterRpc("get_game_config", rpcGetGameConfig); err != nil {
+		return err
+	}
+	if err := initializer.RegisterRpc("get_shop_state", rpcGetShopState); err != nil {
+		return err
+	}
+	if err := initializer.RegisterRpc("reset_shop", rpcResetShop); err != nil {
+		return err
+	}
+	if err := initializer.RegisterRpc("purchase_shop_ingredient", rpcPurchaseShopIngredient); err != nil {
+		return err
+	}
+	if err := initializer.RegisterRpc("adjust_wallet", rpcAdjustWallet); err != nil {
+		return err
+	}
+	if err := initializer.RegisterRpc("sync_wallet", rpcSyncWallet); err != nil {
+		return err
+	}
 
 	logger.Info("Foodcraft Nakama module loaded")
 	return nil

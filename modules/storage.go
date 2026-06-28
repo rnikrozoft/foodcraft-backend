@@ -24,7 +24,12 @@ func readPlayerState(ctx context.Context, nk runtime.NakamaModule, userID string
 		return nil, err
 	}
 	if len(objects) == 0 {
-		return &PlayerState{Discovered: []string{}}, nil
+		return &PlayerState{
+			Discovered:          []string{},
+			UnlockedIngredients: []string{},
+			ShopItemExpiresAt:   map[string]int64{},
+			ShopActiveIDs:       []string{},
+		}, nil
 	}
 	var state PlayerState
 	if err := json.Unmarshal([]byte(objects[0].Value), &state); err != nil {
@@ -32,6 +37,15 @@ func readPlayerState(ctx context.Context, nk runtime.NakamaModule, userID string
 	}
 	if state.Discovered == nil {
 		state.Discovered = []string{}
+	}
+	if state.UnlockedIngredients == nil {
+		state.UnlockedIngredients = []string{}
+	}
+	if state.ShopItemExpiresAt == nil {
+		state.ShopItemExpiresAt = map[string]int64{}
+	}
+	if state.ShopActiveIDs == nil {
+		state.ShopActiveIDs = []string{}
 	}
 	return &state, nil
 }

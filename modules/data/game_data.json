@@ -1719,5 +1719,40 @@
   "initial_discovered": [
     "rice",
     "egg"
-  ]
+  ],
+  "starter_items": [
+    "rice",
+    "egg"
+  ],
+  "shop": {
+    "reset_cycle_sec": 86400,
+    "reset_mid_count": 5,
+    "reset_prices": {
+      "mid": 90,
+      "high": 150,
+      "currency": "coins"
+    },
+    "rarity_cooldown_days": {
+      "common": 3,
+      "uncommon": 5,
+      "rare": 7,
+      "epic": 10,
+      "legendary": 14
+    },
+    "rarity_costs": {
+      "common": 80,
+      "uncommon": 150,
+      "rare": 280,
+      "epic": 450,
+      "legendary": 700
+    },
+    "rarity_labels": {
+      "common": "ธรรมดา",
+      "uncommon": "หายาก",
+      "rare": "แรร์",
+      "epic": "เอปิค",
+      "legendary": "ตำนาน"
+    },
+    "rotation_count": 8
+  }
 }
