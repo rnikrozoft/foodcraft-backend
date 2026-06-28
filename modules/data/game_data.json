@@ -1725,27 +1725,12 @@
     "egg"
   ],
   "shop": {
-    "rarity_rotation_weights": {
-      "common": 50,
-      "uncommon": 25,
-      "rare": 15,
-      "epic": 7,
-      "legendary": 3
-    },
-    "rarity_costs": {
-      "common": 80,
-      "uncommon": 150,
-      "rare": 280,
-      "epic": 450,
-      "legendary": 700
-    },
     "rarity_labels": {
       "common": "ธรรมดา",
       "uncommon": "หายาก",
       "rare": "แรร์",
       "epic": "เอปิค",
       "legendary": "ตำนาน"
-    },
-    "rotation_count": 8
+    }
   }
 }

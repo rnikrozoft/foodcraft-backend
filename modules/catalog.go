@@ -23,6 +23,10 @@ type Catalog struct {
 var catalog *Catalog
 
 func loadCatalog() (*Catalog, error) {
+	if err := loadGameBalance(); err != nil {
+		return nil, fmt.Errorf("game balance: %w", err)
+	}
+
 	var raw struct {
 		Items        []ItemDef   `json:"items"`
 		Recipes      []RecipeDef `json:"recipes"`
@@ -33,13 +37,18 @@ func loadCatalog() (*Catalog, error) {
 		return nil, err
 	}
 
+	shop, err := loadShopConfigFromEnv(raw.Shop.RarityLabels)
+	if err != nil {
+		return nil, fmt.Errorf("shop config: %w", err)
+	}
+
 	c := &Catalog{
 		Items:           make(map[string]ItemDef, len(raw.Items)),
 		RecipeByKey:     make(map[string]string, len(raw.Recipes)),
 		ItemPoints:      make(map[string]int, len(raw.Items)),
 		DiscoverableIDs: make(map[string]bool),
 		StarterIDs:      make(map[string]bool),
-		Shop:            applyShopEnvOverrides(raw.Shop),
+		Shop:            shop,
 	}
 
 	outDegree := make(map[string]int)
@@ -84,10 +93,10 @@ func discoveryPoint(tier int, branchFactor int) int {
 	if tier < 1 {
 		return 0
 	}
-	base := tier * 10
-	bonus := branchFactor * 2
-	if bonus > 30 {
-		bonus = 30
+	base := tier * gameBalance.DiscoveryPointsPerTier
+	bonus := branchFactor * gameBalance.DiscoveryBranchBonus
+	if bonus > gameBalance.DiscoveryBranchBonusMax {
+		bonus = gameBalance.DiscoveryBranchBonusMax
 	}
 	return base + bonus
 }
@@ -168,7 +177,11 @@ func (c *Catalog) gameConfigResponse() GameConfigResponse {
 		Items:             items,
 		StarterItems:      starterItems,
 		DiscoverableTotal: len(c.DiscoverableIDs),
-		DailyRewardCoins:  dailyRewardCoins,
+		DailyRewardCoins:  gameBalance.DailyRewardCoins,
+		Monetization: MonetizationConfig{
+			AdRewardCoins:    gameBalance.AdRewardCoins,
+			StarterPackCoins: gameBalance.StarterPackCoins,
+		},
 		Shop:              c.Shop,
 	}
 }

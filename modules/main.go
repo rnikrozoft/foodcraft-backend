@@ -13,6 +13,13 @@ func InitModule(ctx context.Context, logger runtime.Logger, db *sql.DB, nk runti
 		return err
 	}
 	logger.Info("Foodcraft catalog loaded: %d items, %d recipes", len(catalog.Items), len(catalog.RecipeByKey))
+	logger.Info("Game balance: daily=%d reward_star=%d%% discovery_pt/tier=%d milestones=%d/%d",
+		gameBalance.DailyRewardCoins,
+		gameBalance.RewardStarPercent,
+		gameBalance.DiscoveryPointsPerTier,
+		gameBalance.LeaderboardMilestoneMenu1,
+		gameBalance.LeaderboardMilestoneMenu2,
+	)
 	logger.Info("Shop config: rotation=%d weights=%v costs=%v",
 		catalog.Shop.RotationCount,
 		catalog.Shop.RarityRotationWeights,

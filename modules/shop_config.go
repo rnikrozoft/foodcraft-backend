@@ -2,57 +2,9 @@ package main
 
 import "sort"
 
-func defaultShopConfig() ShopConfig {
-	return ShopConfig{
-		RarityRotationWeights: map[string]int{
-			"common":    50,
-			"uncommon":  25,
-			"rare":      15,
-			"epic":      7,
-			"legendary": 3,
-		},
-		RarityCosts: map[string]int{
-			"common":    80,
-			"uncommon":  150,
-			"rare":      280,
-			"epic":      450,
-			"legendary": 700,
-		},
-		RarityLabels: map[string]string{
-			"common":    "ธรรมดา",
-			"uncommon":  "หายาก",
-			"rare":      "แรร์",
-			"epic":      "เอปิค",
-			"legendary": "ตำนาน",
-		},
-		RotationCount: 8,
-	}
-}
-
-func normalizeShopConfig(cfg ShopConfig) ShopConfig {
-	def := defaultShopConfig()
-	if len(cfg.RarityRotationWeights) == 0 {
-		cfg.RarityRotationWeights = def.RarityRotationWeights
-	}
-	if len(cfg.RarityCosts) == 0 {
-		cfg.RarityCosts = def.RarityCosts
-	}
-	if len(cfg.RarityLabels) == 0 {
-		cfg.RarityLabels = def.RarityLabels
-	}
-	if cfg.RotationCount <= 0 {
-		cfg.RotationCount = def.RotationCount
-	}
-	return cfg
-}
-
 func shopRotationWeight(rarity string) int {
 	weight := catalog.Shop.RarityRotationWeights[rarity]
 	if weight <= 0 {
-		def := defaultShopConfig().RarityRotationWeights[rarity]
-		if def > 0 {
-			return def
-		}
 		return 1
 	}
 	return weight

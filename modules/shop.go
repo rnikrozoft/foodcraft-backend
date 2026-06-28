@@ -125,7 +125,7 @@ func buildShopIngredientCatalog() []shopCatalogEntry {
 		rarity := rarityOrder[bucket]
 		cost := cfg.RarityCosts[rarity]
 		if cost <= 0 {
-			cost = 150
+			continue
 		}
 		label := cfg.RarityLabels[rarity]
 		if label == "" {

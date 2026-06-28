@@ -5,12 +5,6 @@ import (
 	"time"
 )
 
-const (
-	craftRateLimit    = 400 * time.Millisecond
-	purchaseRateLimit = 300 * time.Millisecond
-	dailyRateLimit    = 3 * time.Second
-)
-
 var (
 	rateMu      sync.Mutex
 	rateBuckets = map[string]time.Time{}

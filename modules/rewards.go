@@ -5,8 +5,6 @@ import (
 	"encoding/binary"
 )
 
-const starDropPercent = 28
-
 func secureRandInt(max int) int {
 	if max <= 0 {
 		return 0
@@ -23,20 +21,21 @@ func rollDiscoveryReward(tier int) (rewardType string, amount int) {
 	if tier < 1 {
 		tier = 1
 	}
-	if secureRandInt(100) < starDropPercent {
+	if secureRandInt(100) < gameBalance.RewardStarPercent {
 		return "star", starAmount(tier)
 	}
 	return "coin", coinAmount(tier)
 }
 
 func coinAmount(tier int) int {
-	base := 10 + tier*12
-	return base + secureRandInt(tier*8+1)
+	base := gameBalance.RewardCoinBase + tier*gameBalance.RewardCoinPerTier
+	randomSpan := tier*gameBalance.RewardCoinRandomPerTier + 1
+	return base + secureRandInt(randomSpan)
 }
 
 func starAmount(tier int) int {
-	if tier <= 2 {
-		return 1
+	if tier <= gameBalance.RewardStarTierThreshold {
+		return gameBalance.RewardStarAmountLow
 	}
-	return 2
+	return gameBalance.RewardStarAmountHigh
 }

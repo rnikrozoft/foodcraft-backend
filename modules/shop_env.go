@@ -1,52 +1,65 @@
 package main
 
 import (
-	"os"
-	"strconv"
+	"fmt"
 	"strings"
 )
 
-// Shop tunables are loaded from environment variables (see .env.example).
-// Nakama Console "Server Configuration" shows local.yml only (logger, session, etc.)
-// — not game shop settings. Use .env + docker compose env_file for shop balance.
-func applyShopEnvOverrides(cfg ShopConfig) ShopConfig {
-	cfg = normalizeShopConfig(cfg)
+var shopRarities = []string{"common", "uncommon", "rare", "epic", "legendary"}
 
-	if v := strings.TrimSpace(os.Getenv("SHOP_ROTATION_COUNT")); v != "" {
-		if n, err := strconv.Atoi(v); err == nil && n > 0 {
-			cfg.RotationCount = n
+// Shop tunables are loaded from required environment variables (see .env.example).
+// Rarity display labels come from game_data.json (shop.rarity_labels) only.
+func loadShopConfigFromEnv(jsonLabels map[string]string) (ShopConfig, error) {
+	if len(jsonLabels) == 0 {
+		return ShopConfig{}, fmt.Errorf("missing shop.rarity_labels in game_data.json")
+	}
+	for _, rarity := range shopRarities {
+		if strings.TrimSpace(jsonLabels[rarity]) == "" {
+			return ShopConfig{}, fmt.Errorf("missing shop.rarity_labels.%s in game_data.json", rarity)
 		}
 	}
 
-	weights := map[string]string{
-		"common":    "SHOP_WEIGHT_COMMON",
-		"uncommon":  "SHOP_WEIGHT_UNCOMMON",
-		"rare":      "SHOP_WEIGHT_RARE",
-		"epic":      "SHOP_WEIGHT_EPIC",
-		"legendary": "SHOP_WEIGHT_LEGENDARY",
-	}
-	for rarity, envKey := range weights {
-		if v := strings.TrimSpace(os.Getenv(envKey)); v != "" {
-			if n, err := strconv.Atoi(v); err == nil && n > 0 {
-				cfg.RarityRotationWeights[rarity] = n
-			}
-		}
+	rotation, err := envRequiredIntPositive("SHOP_ROTATION_COUNT")
+	if err != nil {
+		return ShopConfig{}, err
 	}
 
-	costs := map[string]string{
-		"common":    "SHOP_COST_COMMON",
-		"uncommon":  "SHOP_COST_UNCOMMON",
-		"rare":      "SHOP_COST_RARE",
-		"epic":      "SHOP_COST_EPIC",
-		"legendary": "SHOP_COST_LEGENDARY",
-	}
-	for rarity, envKey := range costs {
-		if v := strings.TrimSpace(os.Getenv(envKey)); v != "" {
-			if n, err := strconv.Atoi(v); err == nil && n > 0 {
-				cfg.RarityCosts[rarity] = n
-			}
+	weights := make(map[string]int, len(shopRarities))
+	costs := make(map[string]int, len(shopRarities))
+	labels := make(map[string]string, len(shopRarities))
+	for _, rarity := range shopRarities {
+		envWeight := "SHOP_WEIGHT_" + shopEnvSuffix(rarity)
+		if weights[rarity], err = envRequiredIntPositive(envWeight); err != nil {
+			return ShopConfig{}, err
 		}
+		envCost := "SHOP_COST_" + shopEnvSuffix(rarity)
+		if costs[rarity], err = envRequiredIntPositive(envCost); err != nil {
+			return ShopConfig{}, err
+		}
+		labels[rarity] = jsonLabels[rarity]
 	}
 
-	return cfg
+	return ShopConfig{
+		RarityRotationWeights: weights,
+		RarityCosts:           costs,
+		RarityLabels:          labels,
+		RotationCount:         rotation,
+	}, nil
+}
+
+func shopEnvSuffix(rarity string) string {
+	switch rarity {
+	case "common":
+		return "COMMON"
+	case "uncommon":
+		return "UNCOMMON"
+	case "rare":
+		return "RARE"
+	case "epic":
+		return "EPIC"
+	case "legendary":
+		return "LEGENDARY"
+	default:
+		return rarity
+	}
 }

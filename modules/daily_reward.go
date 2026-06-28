@@ -10,9 +10,8 @@ import (
 )
 
 const (
-	collectionReward   = "reward"
-	keyDailyReward     = "daily"
-	dailyRewardCoins   = 120
+	collectionReward = "reward"
+	keyDailyReward   = "daily"
 )
 
 type DailyRewardRecord struct {
@@ -62,7 +61,7 @@ func nextDailyClaimSec(lastClaimUnix int64) int64 {
 func buildDailyRewardStatus(record DailyRewardRecord) DailyRewardStatusResponse {
 	return DailyRewardStatusResponse{
 		CanClaim:      canClaimDailyReward(record.LastClaimUnix),
-		Coins:         dailyRewardCoins,
+		Coins:         gameBalance.DailyRewardCoins,
 		NextClaimSec:  nextDailyClaimSec(record.LastClaimUnix),
 		LastClaimUnix: record.LastClaimUnix,
 	}
@@ -106,7 +105,7 @@ func rpcClaimDailyReward(ctx context.Context, logger runtime.Logger, db *sql.DB,
 	if err != nil {
 		return "", err
 	}
-	if err := checkRateLimit(userID, "daily_claim", dailyRateLimit); err != nil {
+	if err := checkRateLimit(userID, "daily_claim", gameBalance.RateLimitDaily); err != nil {
 		return "", err
 	}
 
@@ -127,7 +126,7 @@ func rpcClaimDailyReward(ctx context.Context, logger runtime.Logger, db *sql.DB,
 			return "", rpcError("failed to encode daily reward", 13)
 		}
 
-		changeset := map[string]int64{walletKeyCoins: int64(dailyRewardCoins)}
+		changeset := map[string]int64{walletKeyCoins: int64(gameBalance.DailyRewardCoins)}
 		writes := []*runtime.StorageWrite{{
 			Collection:      collectionReward,
 			Key:             keyDailyReward,
@@ -160,7 +159,7 @@ func rpcClaimDailyReward(ctx context.Context, logger runtime.Logger, db *sql.DB,
 		}
 		status := buildDailyRewardStatus(record)
 		resp := DailyRewardClaimResponse{
-			CoinsReceived: dailyRewardCoins,
+			CoinsReceived: gameBalance.DailyRewardCoins,
 			Coins:         wallet.Coins,
 			Stars:         wallet.Stars,
 			CanClaim:      status.CanClaim,

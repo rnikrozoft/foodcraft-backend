@@ -112,12 +112,18 @@ type ShopConfig struct {
 }
 
 type GameConfigResponse struct {
-	Version           int        `json:"version"`
-	Items             []ItemDef  `json:"items"`
-	StarterItems      []string   `json:"starter_items"`
-	DiscoverableTotal int        `json:"discoverable_total"`
-	DailyRewardCoins  int        `json:"daily_reward_coins"`
-	Shop              ShopConfig `json:"shop"`
+	Version           int                 `json:"version"`
+	Items             []ItemDef           `json:"items"`
+	StarterItems      []string            `json:"starter_items"`
+	DiscoverableTotal int                 `json:"discoverable_total"`
+	DailyRewardCoins  int                 `json:"daily_reward_coins"`
+	Monetization      MonetizationConfig  `json:"monetization"`
+	Shop              ShopConfig          `json:"shop"`
+}
+
+type MonetizationConfig struct {
+	AdRewardCoins    int `json:"ad_reward_coins"`
+	StarterPackCoins int `json:"starter_pack_coins"`
 }
 
 type ShopIngredientOffer struct {

@@ -9,24 +9,24 @@ import (
 )
 
 const (
-	leaderboardFame            = "culinary_fame"
-	leaderboardExplorer        = "explorer"
-	leaderboardFirstDiscoverer = "first_discoverer"
-	leaderboardEfficiency      = "efficiency"
-	leaderboardSpeed100        = "speed_runner_100"
-	leaderboardSpeed500        = "speed_runner_500"
-	leaderboardCombo           = "combo_master"
-	leaderboardRareHunter      = "rare_hunter"
-	leaderboardCatThai         = "category_thai"
-	leaderboardCatJapanese     = "category_japanese"
-	leaderboardCatChinese      = "category_chinese"
-	leaderboardCatWestern      = "category_western"
-	leaderboardCatDessert      = "category_dessert"
-	leaderboardSeasonExplorer  = "season_explorer"
+	leaderboardFame             = "culinary_fame"
+	leaderboardExplorer         = "explorer"
+	leaderboardFirstDiscoverer  = "first_discoverer"
+	leaderboardEfficiency       = "efficiency"
+	leaderboardSpeed100         = "speed_runner_100"
+	leaderboardSpeed500         = "speed_runner_500"
+	leaderboardCombo            = "combo_master"
+	leaderboardRareHunter       = "rare_hunter"
+	leaderboardCatThai          = "category_thai"
+	leaderboardCatJapanese      = "category_japanese"
+	leaderboardCatChinese         = "category_chinese"
+	leaderboardCatWestern       = "category_western"
+	leaderboardCatDessert       = "category_dessert"
+	leaderboardSeasonExplorer   = "season_explorer"
 	leaderboardSeasonEfficiency = "season_efficiency"
 )
 
-const speedScoreBase int64 = 2_000_000_000
+var leaderboardDefs []boardDef
 
 type boardDef struct {
 	ID          string `json:"id"`
@@ -36,22 +36,27 @@ type boardDef struct {
 	ScoreUnit   string `json:"score_unit"`
 }
 
-var leaderboardDefs = []boardDef{
-	{leaderboardFame, "ชื่อเสียง", 1, "แต้มค้นพบรวม — เมนูหายากได้แต้มมากกว่า", "แต้ม"},
-	{leaderboardExplorer, "นักสำรวจ", 1, "จำนวนเมนูที่ค้นพบทั้งหมด", "เมนู"},
-	{leaderboardFirstDiscoverer, "ผู้ค้นพบคนแรก", 1, "จำนวนเมนูที่เป็นคนแรกของเซิร์ฟเวอร์", "ครั้ง"},
-	{leaderboardEfficiency, "ประสิทธิภาพ", 2, "เมนูที่ค้นพบ ÷ จำนวนครั้งที่ผสม (ยิ่งสูงยิ่งเก่ง)", "%"},
-	{leaderboardSpeed100, "ความเร็ว 100 เมนู", 2, "ใครค้นพบครบ 100 เมนูเร็วที่สุด", "คะแนน"},
-	{leaderboardSpeed500, "ความเร็ว 500 เมนู", 2, "ใครค้นพบครบ 500 เมนูเร็วที่สุด", "คะแนน"},
-	{leaderboardCombo, "คอมโบมาสเตอร์", 2, "ค้นพบเมนูใหม่ติดต่อกันสูงสุด", "ครั้ง"},
-	{leaderboardRareHunter, "นักล่าของหายาก", 2, "จำนวนเมนูระดับหายาก (tier 3+) ที่ค้นพบ", "เมนู"},
-	{leaderboardCatThai, "อาหารไทย", 3, "จำนวนเมนูอาหารไทยที่ค้นพบ", "เมนู"},
-	{leaderboardCatJapanese, "อาหารญี่ปุ่น", 3, "จำนวนเมนูอาหารญี่ปุ่นที่ค้นพบ", "เมนู"},
-	{leaderboardCatChinese, "อาหารจีน", 3, "จำนวนเมนูอาหารจีนที่ค้นพบ", "เมนู"},
-	{leaderboardCatWestern, "อาหารตะวันตก", 3, "จำนวนเมนูอาหารตะวันตกที่ค้นพบ", "เมนู"},
-	{leaderboardCatDessert, "ของหวาน", 3, "จำนวนเมนูของหวานที่ค้นพบ", "เมนู"},
-	{leaderboardSeasonExplorer, "นักสำรวจประจำเดือน", 5, "เมนูที่ค้นพบใหม่ในเดือนนี้", "เมนู"},
-	{leaderboardSeasonEfficiency, "ประสิทธิภาพประจำเดือน", 5, "ประสิทธิภาพการผสมในเดือนนี้", "%"},
+func applyLeaderboardBalanceConfig() {
+	m1 := gameBalance.LeaderboardMilestoneMenu1
+	m2 := gameBalance.LeaderboardMilestoneMenu2
+	rareMin := gameBalance.LeaderboardRareTierMin
+	leaderboardDefs = []boardDef{
+		{leaderboardFame, "ชื่อเสียง", 1, "แต้มค้นพบรวม — เมนูหายากได้แต้มมากกว่า", "แต้ม"},
+		{leaderboardExplorer, "นักสำรวจ", 1, "จำนวนเมนูที่ค้นพบทั้งหมด", "เมนู"},
+		{leaderboardFirstDiscoverer, "ผู้ค้นพบคนแรก", 1, "จำนวนเมนูที่เป็นคนแรกของเซิร์ฟเวอร์", "ครั้ง"},
+		{leaderboardEfficiency, "ประสิทธิภาพ", 2, "เมนูที่ค้นพบ ÷ จำนวนครั้งที่ผสม (ยิ่งสูงยิ่งเก่ง)", "%"},
+		{leaderboardSpeed100, fmt.Sprintf("ความเร็ว %d เมนู", m1), 2, fmt.Sprintf("ใครค้นพบครบ %d เมนูเร็วที่สุด", m1), "คะแนน"},
+		{leaderboardSpeed500, fmt.Sprintf("ความเร็ว %d เมนู", m2), 2, fmt.Sprintf("ใครค้นพบครบ %d เมนูเร็วที่สุด", m2), "คะแนน"},
+		{leaderboardCombo, "คอมโบมาสเตอร์", 2, "ค้นพบเมนูใหม่ติดต่อกันสูงสุด", "ครั้ง"},
+		{leaderboardRareHunter, "นักล่าของหายาก", 2, fmt.Sprintf("จำนวนเมนูระดับหายาก (tier %d+) ที่ค้นพบ", rareMin), "เมนู"},
+		{leaderboardCatThai, "อาหารไทย", 3, "จำนวนเมนูอาหารไทยที่ค้นพบ", "เมนู"},
+		{leaderboardCatJapanese, "อาหารญี่ปุ่น", 3, "จำนวนเมนูอาหารญี่ปุ่นที่ค้นพบ", "เมนู"},
+		{leaderboardCatChinese, "อาหารจีน", 3, "จำนวนเมนูอาหารจีนที่ค้นพบ", "เมนู"},
+		{leaderboardCatWestern, "อาหารตะวันตก", 3, "จำนวนเมนูอาหารตะวันตกที่ค้นพบ", "เมนู"},
+		{leaderboardCatDessert, "ของหวาน", 3, "จำนวนเมนูของหวานที่ค้นพบ", "เมนู"},
+		{leaderboardSeasonExplorer, "นักสำรวจประจำเดือน", 5, "เมนูที่ค้นพบใหม่ในเดือนนี้", "เมนู"},
+		{leaderboardSeasonEfficiency, "ประสิทธิภาพประจำเดือน", 5, "ประสิทธิภาพการผสมในเดือนนี้", "%"},
+	}
 }
 
 func boardDefFor(id string) (boardDef, bool) {
@@ -89,16 +94,16 @@ func onNewDiscovery(state *PlayerState, itemID string, wasFirst bool) {
 	if wasFirst {
 		state.FirstDiscoverCount++
 	}
-	if catalog.TierFor(itemID) >= 3 {
+	if catalog.TierFor(itemID) >= gameBalance.LeaderboardRareTierMin {
 		state.RareDiscoverCount++
 	}
 	state.SeasonDiscoveries++
 	count := discoveryMenuCount(state)
 	now := time.Now().UTC().Unix()
-	if count >= 100 && state.Milestone100At == 0 {
+	if count >= gameBalance.LeaderboardMilestoneMenu1 && state.Milestone100At == 0 {
 		state.Milestone100At = now
 	}
-	if count >= 500 && state.Milestone500At == 0 {
+	if count >= gameBalance.LeaderboardMilestoneMenu2 && state.Milestone500At == 0 {
 		state.Milestone500At = now
 	}
 }
@@ -146,7 +151,7 @@ func speedScore(reachedAt int64) int64 {
 	if reachedAt <= 0 {
 		return 0
 	}
-	score := speedScoreBase - reachedAt
+	score := gameBalance.LeaderboardSpeedScoreBase - reachedAt
 	if score < 0 {
 		return 0
 	}

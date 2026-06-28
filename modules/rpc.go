@@ -18,7 +18,7 @@ func rpcProcessCraft(ctx context.Context, logger runtime.Logger, db *sql.DB, nk 
 	if err != nil {
 		return "", err
 	}
-	if err := checkRateLimit(userID, "craft", craftRateLimit); err != nil {
+	if err := checkRateLimit(userID, "craft", gameBalance.RateLimitCraft); err != nil {
 		return "", err
 	}
 	username := mustUsername(ctx)
@@ -338,7 +338,7 @@ func rpcPurchaseShopIngredient(ctx context.Context, logger runtime.Logger, db *s
 	if err != nil {
 		return "", err
 	}
-	if err := checkRateLimit(userID, "shop_purchase", purchaseRateLimit); err != nil {
+	if err := checkRateLimit(userID, "shop_purchase", gameBalance.RateLimitPurchase); err != nil {
 		return "", err
 	}
 	var req PurchaseIngredientRequest
