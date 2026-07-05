@@ -34,6 +34,11 @@ type PlayerState struct {
 	UnlockedIngredients     []string `json:"unlocked_ingredients"`
 	ShopLastAutoResetUnix   int64    `json:"shop_last_auto_reset_unix"`
 	ShopActiveIDs           []string `json:"shop_active_ids"`
+	MissionsDay             string   `json:"missions_day,omitempty"`
+	MissionCraftCount       int      `json:"mission_craft_count,omitempty"`
+	MissionDiscoverCount    int      `json:"mission_discover_count,omitempty"`
+	MissionIngredientCount  int      `json:"mission_ingredient_count,omitempty"`
+	MissionsClaimed         []string `json:"missions_claimed,omitempty"`
 	// Legacy fields — ignored after auto-only shop migration.
 	ShopCycleStart       int64            `json:"shop_cycle_start,omitempty"`
 	ShopManualResetCount int              `json:"shop_manual_reset_count,omitempty"`
@@ -58,6 +63,7 @@ type DiscoverResponse struct {
 	FirstDiscoverer string   `json:"first_discoverer,omitempty"`
 	Discovered      []string `json:"discovered"`
 	UnlockedIngredients []string `json:"unlocked_ingredients"`
+	MissionClaimable    int      `json:"mission_claimable"`
 }
 
 type ProfileResponse struct {

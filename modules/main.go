@@ -67,6 +67,15 @@ func InitModule(ctx context.Context, logger runtime.Logger, db *sql.DB, nk runti
 	if err := initializer.RegisterRpc("claim_daily_reward", rpcClaimDailyReward); err != nil {
 		return err
 	}
+	if err := initializer.RegisterRpc("get_missions", rpcGetMissions); err != nil {
+		return err
+	}
+	if err := initializer.RegisterRpc("claim_mission", rpcClaimMission); err != nil {
+		return err
+	}
+	if err := initializer.RegisterRpc("buy_hint", rpcBuyHint); err != nil {
+		return err
+	}
 
 	logger.Info("Foodcraft Nakama module loaded")
 	return nil

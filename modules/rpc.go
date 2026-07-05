@@ -58,6 +58,7 @@ func rpcProcessCraft(ctx context.Context, logger runtime.Logger, db *sql.DB, nk 
 
 		state.CraftCount++
 		onCraftRecorded(state, isNew)
+		recordMissionProgress(state, resultKind, isNew)
 
 		walletDelta := map[string]int64{}
 		var applyErr error

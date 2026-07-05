@@ -65,6 +65,7 @@ func buildDiscoverResponse(state *PlayerState, wallet WalletResponse, outcome cr
 		FirstDiscoverer:     outcome.FirstDiscoverer,
 		Discovered:          state.Discovered,
 		UnlockedIngredients: copyStringSlice(state.UnlockedIngredients),
+		MissionClaimable:    claimableMissionCount(state),
 	}
 }
 
