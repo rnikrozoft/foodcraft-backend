@@ -14,6 +14,11 @@ var gameDataJSON []byte
 type Catalog struct {
 	Items           map[string]ItemDef
 	RecipeByKey     map[string]string
+	// ItemRecipeResults maps an ingredient id -> the distinct result ids of
+	// every recipe it participates in (as either side of the pair). Used to
+	// compute "how many more things can I still craft with this?" without
+	// ever exposing the actual A+B pairs to the client.
+	ItemRecipeResults map[string][]string
 	ItemPoints      map[string]int
 	DiscoverableIDs map[string]bool
 	StarterIDs      map[string]bool
@@ -52,10 +57,26 @@ func loadCatalog() (*Catalog, error) {
 	}
 
 	outDegree := make(map[string]int)
+	itemResultSets := make(map[string]map[string]bool)
 	for _, recipe := range raw.Recipes {
 		c.RecipeByKey[recipeKey(recipe.A, recipe.B)] = recipe.Result
 		outDegree[recipe.A]++
 		outDegree[recipe.B]++
+		for _, ingredientID := range []string{recipe.A, recipe.B} {
+			if itemResultSets[ingredientID] == nil {
+				itemResultSets[ingredientID] = make(map[string]bool)
+			}
+			itemResultSets[ingredientID][recipe.Result] = true
+		}
+	}
+	c.ItemRecipeResults = make(map[string][]string, len(itemResultSets))
+	for ingredientID, resultSet := range itemResultSets {
+		results := make([]string, 0, len(resultSet))
+		for resultID := range resultSet {
+			results = append(results, resultID)
+		}
+		sort.Strings(results)
+		c.ItemRecipeResults[ingredientID] = results
 	}
 
 	for _, item := range raw.Items {
@@ -195,6 +216,21 @@ func (c *Catalog) HasIngredient(discovered map[string]bool, unlocked map[string]
 		return c.IsStarter(id) || unlocked[id]
 	}
 	return discovered[id]
+}
+
+// RemainingCraftableCount returns how many distinct recipe results this item
+// participates in (as either ingredient) that aren't in `discovered` yet.
+// It's a completion/exploration hint ("N more things possible with this"),
+// not a strict "you have the other ingredient too" check, and it never
+// reveals the actual A+B pairs or result ids to the caller.
+func (c *Catalog) RemainingCraftableCount(itemID string, discovered map[string]bool) int {
+	count := 0
+	for _, resultID := range c.ItemRecipeResults[itemID] {
+		if !discovered[resultID] {
+			count++
+		}
+	}
+	return count
 }
 
 func (c *Catalog) TierFor(itemID string) int {

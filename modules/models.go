@@ -17,6 +17,12 @@ type RecipeDef struct {
 
 type PlayerState struct {
 	Discovered          []string `json:"discovered"`
+	// DiscoveredAt maps item id -> unix timestamp of when the player first
+	// discovered/unlocked it (covers both menu discoveries and ingredient
+	// unlocks). Items discovered before this field existed are backfilled to
+	// StartedAt (see backfillDiscoveredAt) so sorting stays stable even
+	// though their true historical order isn't recoverable.
+	DiscoveredAt        map[string]int64 `json:"discovered_at,omitempty"`
 	CraftCount          int      `json:"craft_count"`
 	DiscoveryPoints     int      `json:"discovery_points"`
 	LegacyCoins         int      `json:"coins,omitempty"`
@@ -62,7 +68,9 @@ type DiscoverResponse struct {
 	RewardAmount    int      `json:"reward_amount,omitempty"`
 	FirstDiscoverer string   `json:"first_discoverer,omitempty"`
 	Discovered      []string `json:"discovered"`
+	DiscoveredAt    map[string]int64 `json:"discovered_at,omitempty"`
 	UnlockedIngredients []string `json:"unlocked_ingredients"`
+	CraftableCounts     map[string]int `json:"craftable_counts,omitempty"`
 	MissionClaimable    int      `json:"mission_claimable"`
 }
 
@@ -150,6 +158,8 @@ type ShopStateResponse struct {
 	NextShopResetSec      int64                 `json:"next_shop_reset_sec"`
 	ShopActiveIDs         []string              `json:"shop_active_ids"`
 	UnlockedIngredients   []string              `json:"unlocked_ingredients"`
+	DiscoveredAt          map[string]int64      `json:"discovered_at,omitempty"`
+	CraftableCounts       map[string]int        `json:"craftable_counts,omitempty"`
 	Offers                []ShopIngredientOffer `json:"offers"`
 }
 

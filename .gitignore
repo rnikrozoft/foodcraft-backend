@@ -1,2 +1,5 @@
 .env
 modules/backend.so
+
+# macOS
+.DS_Store

@@ -48,6 +48,30 @@ func normalizePlayerState(state *PlayerState) {
 	if state.ShopActiveIDs == nil {
 		state.ShopActiveIDs = []string{}
 	}
+	backfillDiscoveredAt(state)
+}
+
+// backfillDiscoveredAt ensures every already-discovered/unlocked item has a
+// DiscoveredAt entry. Items discovered before this field existed have no real
+// history to recover, so they're all stamped with the player's account
+// StartedAt — stable across reads (no jitter in sort order) even though it
+// can't reflect their true original order. New discoveries from now on get
+// an accurate timestamp the moment they happen (see recordDiscoveredAt).
+func backfillDiscoveredAt(state *PlayerState) {
+	if state.DiscoveredAt == nil {
+		state.DiscoveredAt = map[string]int64{}
+	}
+	fallback := state.StartedAt
+	for _, id := range state.Discovered {
+		if _, ok := state.DiscoveredAt[id]; !ok {
+			state.DiscoveredAt[id] = fallback
+		}
+	}
+	for _, id := range state.UnlockedIngredients {
+		if _, ok := state.DiscoveredAt[id]; !ok {
+			state.DiscoveredAt[id] = fallback
+		}
+	}
 }
 
 func readPlayerStateRecord(ctx context.Context, nk runtime.NakamaModule, userID string) (*playerStateRecord, error) {

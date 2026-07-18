@@ -132,7 +132,9 @@ func rpcGetProfile(ctx context.Context, logger runtime.Logger, db *sql.DB, nk ru
 		"max_combo_streak":     state.MaxComboStreak,
 		"rare_discover_count":  state.RareDiscoverCount,
 		"discovered":           state.Discovered,
+		"discovered_at":        state.DiscoveredAt,
 		"unlocked_ingredients": state.UnlockedIngredients,
+		"craftable_counts":     craftableRemainingCounts(state),
 		"ranks":                allBoardRanks(ctx, nk, userID),
 	})
 	return string(bytes), nil

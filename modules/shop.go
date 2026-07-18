@@ -189,6 +189,8 @@ func buildShopStateResponse(state *PlayerState, wallet WalletResponse) ShopState
 		NextShopResetSec:      nextShopResetSec(),
 		ShopActiveIDs:         activeCopy,
 		UnlockedIngredients:   unlockedCopy,
+		DiscoveredAt:          state.DiscoveredAt,
+		CraftableCounts:       craftableRemainingCounts(state),
 		Offers:                offers,
 	}
 }
@@ -210,6 +212,7 @@ func unlockIngredient(state *PlayerState, id string) bool {
 		return true
 	}
 	state.UnlockedIngredients = uniqueAppend(state.UnlockedIngredients, id)
+	recordDiscoveredAt(state, id)
 	return true
 }
 

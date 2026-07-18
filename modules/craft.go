@@ -37,6 +37,7 @@ func applyValidatedCraft(
 		outcome.IsNew = !containsID(state.Discovered, itemID)
 		if outcome.IsNew {
 			state.Discovered = uniqueAppend(state.Discovered, itemID)
+			recordDiscoveredAt(state, itemID)
 			state.DiscoveryPoints = totalPoints(catalog, state.Discovered)
 			outcome.RewardType, outcome.RewardAmount = rollDiscoveryReward(catalog.TierFor(itemID))
 			mergeChangeset(walletDelta, rewardChangeset(outcome.RewardType, outcome.RewardAmount))
@@ -64,7 +65,9 @@ func buildDiscoverResponse(state *PlayerState, wallet WalletResponse, outcome cr
 		RewardAmount:        outcome.RewardAmount,
 		FirstDiscoverer:     outcome.FirstDiscoverer,
 		Discovered:          state.Discovered,
+		DiscoveredAt:        state.DiscoveredAt,
 		UnlockedIngredients: copyStringSlice(state.UnlockedIngredients),
+		CraftableCounts:     craftableRemainingCounts(state),
 		MissionClaimable:    claimableMissionCount(state),
 	}
 }
